@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>De una idea a infinitos contenidos — Valentina Garcia</title>
+<meta name="description" content="Workshop en vivo de una hora con Valentina Garcia. Tres preguntas para descubrir tu camino de contenido.">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="De una idea a infinitos contenidos · Workshop con Valentina Garcia">
+<meta property="og:description" content="No hay un solo camino de contenido. Hay el tuyo. Descúbrelo en tres preguntas.">
+<meta property="og:image" content="img/valen-hero.jpg">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/camino.css?v=12">
+</head>
+<body data-page="entrada">
+<div class="draft-banner" role="note">Borrador: lo marcado en rosado está por confirmar. Borrar este aviso (y el noindex del head) al publicar.</div>
+
+<main class="entrada">
+  <div class="entrada-grid">
+    <div class="photo-panel">
+      <img src="img/valen-hero.jpg" alt="Valentina Garcia" width="1100" height="1460" fetchpriority="high">
+      <span class="photo-tag">Valentina Garcia · creadora de DocuSelling</span>
+      <span class="sticker s1">En vivo</span><span class="sticker s2">1 hora</span><span class="sticker s3">USD 27</span>
+    </div>
+
+    <div class="panel wm wm-br">
+      <div class="topbar"><span class="brand"><img src="img/logo-valen.png" alt="Valentina García · Empresaria digital" width="415" height="155"></span><span class="small">Workshop en vivo · 1 hora</span></div>
+
+      <!-- 0 · intro -->
+      <div class="step active">
+        <p class="ws-name">Workshop · <span data-ws-title></span></p>
+        <h1>No hay un solo camino de contenido. Hay <em>el tuyo</em>.</h1>
+        <p class="promise">En una hora descubres tu camino de contenido y sales con tu primer banco de ideas, armado sobre una estructura que sostiene tu perfil durante meses.</p>
+        <div><button type="button" class="btn" data-start>Descubrir mi camino <span class="arrow" aria-hidden="true">→</span></button></div>
+      </div>
+
+      <!-- 1-3 · preguntas (se pintan desde assets/camino.js) -->
+      <div class="step" data-q="0"></div>
+      <div class="step" data-q="1"></div>
+      <div class="step" data-q="2"></div>
+
+      <!-- 4 · datos -->
+      <div class="step">
+        <div class="progress"><span>Último paso</span><span class="bar"><i style="width:100%"></i></span></div>
+        <h2>Tu camino está <em>listo</em></h2>
+        <p class="hint">Déjanos tus datos para verlo.</p>
+        <form id="lead-form" novalidate>
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" name="nombre" autocomplete="given-name" required>
+          <label for="whatsapp">WhatsApp (con código de país)</label>
+          <input type="tel" id="whatsapp" name="whatsapp" autocomplete="tel" inputmode="tel" placeholder="+57 300 000 0000" required>
+          <label for="email">Correo</label>
+          <input type="email" id="email" name="email" autocomplete="email" inputmode="email" required>
+          <label class="check" for="consent">
+            <input type="checkbox" id="consent" name="consent" required>
+            <span>Autorizo el tratamiento de mis datos personales (Ley 1581 de 2012) según la <mark class="tbd">política de privacidad (enlace)</mark> y acepto recibir información del workshop por WhatsApp y correo.</span>
+          </label>
+          <button class="btn block" type="submit" style="margin-top:22px">Ver mi camino <span class="arrow" aria-hidden="true">→</span></button>
+          <p class="msg" id="msg" role="alert" hidden></p>
+        </form>
+        <div class="step-foot"><button type="button" class="link-btn" data-back>← Atrás</button></div>
+      </div>
+
+      <!-- 5 · eligió "No estoy segura": va al grupo de WhatsApp, no a una página de camino -->
+      <div class="step" data-grupo-step>
+        <p class="eyebrow">Tu resultado</p>
+        <h2>Tu camino lo encontramos <em>contigo</em></h2>
+        <p class="promise">Entra al grupo de WhatsApp: el equipo de Valen te asesora y en pocos mensajes sabes cuál es tu camino.</p>
+        <div><a class="btn" href="#" data-grupo>Entrar al grupo <span class="arrow" aria-hidden="true">→</span></a></div>
+        <p class="msg" id="msg-grupo" role="status" hidden></p>
+      </div>
+
+      <!-- 6 · redirigiendo -->
+      <div class="step">
+        <h2>Armando <em>tu camino</em>…</h2>
+        <div class="loading" role="status"><span class="spinner" aria-hidden="true"></span><span>Un segundo.</span></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="assets/camino.js?v=12"></script>
+</body>
+</html>
