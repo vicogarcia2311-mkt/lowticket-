@@ -75,15 +75,16 @@ module.exports = async (req, res) => {
           transaccion_id: d.id,
           email,
           producto: (d.product && (d.product.title || d.product.id)) || null,
-          monto: typeof d.total === "number" ? d.total : null,
-          moneda: d.currency ? String(d.currency).toUpperCase() : "USD",
+          // Siempre en USD para no sumar pesos con dólares (Whop cobra en COP a compradores en Colombia)
+          monto: typeof d.usd_total === "number" ? d.usd_total : (typeof d.total === "number" ? d.total : null),
+          moneda: typeof d.usd_total === "number" ? "USD" : (d.currency ? String(d.currency).toUpperCase() : "USD"),
           estado: "aprobada",
           angulo: lead ? lead.angulo : null,
           lead_id: lead ? lead.id : null,
           raw: evento
         }
       });
-      await avisar("venta_aprobada", { pago_id: d.id, email, monto: d.total, moneda: d.currency, angulo: lead ? lead.angulo : null,
+      await avisar("venta_aprobada", { pago_id: d.id, email, monto: typeof d.usd_total === "number" ? d.usd_total : d.total, moneda: typeof d.usd_total === "number" ? "usd" : d.currency, angulo: lead ? lead.angulo : null,
         nombre: d.user && d.user.name, producto: d.product && d.product.title });
     } else if (evento.type === "refund.created") {
       await marcar((d.payment && d.payment.id) || d.payment_id, "reembolsada");

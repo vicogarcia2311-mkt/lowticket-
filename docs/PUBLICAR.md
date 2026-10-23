@@ -80,4 +80,6 @@ Correr `supabase/002_leads_unicos_consentimiento.sql`: un lead por correo (se ac
 
 - Correr `supabase/003_eventos_embudo_utm.sql` (tabla `eventos` y vistas `embudo_utm` y `ventas_utm`, sin datos personales).
 - La web registra: visita, test iniciado, cada pregunta, formulario, lead, clic al grupo, clic de compra y clic en espera, cada uno con sus 5 UTM.
-- Panel: `https://valentinamkt.online/panel.html`, protegido con la variable `PANEL_CLAVE` en Vercel (una clave que tú eliges).
+- Correr también `supabase/004_panel.sql` (función `panel_datos` con filtro de fechas).
+- Panel: `https://valentinamkt.online/panel.html`, protegido con `PANEL_CLAVE` en Vercel. Tiene datos personales (nombres, correos, WhatsApp): la clave solo para JM, Valen y Karen.
+- Pestañas: Resumen (indicadores, gráfico por día, por camino, top piezas), Embudo por UTM, Leads (filtros, botón de WhatsApp, CSV) y Ventas.
