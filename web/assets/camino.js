@@ -1,6 +1,6 @@
 /* De una idea a infinitos contenidos — lógica compartida.
-   Entrada (camino.html): test de 3 preguntas → datos → página del ángulo.
-   Páginas por ángulo (camino-*.html): se arman desde ANGULOS con <body data-angulo="...">.
+   Entrada (/camino): test de 3 preguntas → datos → página del ángulo.
+   Páginas por ángulo (/camino-*): se arman desde ANGULOS con <body data-angulo="...">.
    Spec: ../OFERTA-Y-PROMESA-22oct.md */
 
 const CONFIG = {
@@ -10,7 +10,7 @@ const CONFIG = {
   whatsappGrupo: "",      // grupo de WhatsApp donde el equipo orienta a quien no sabe su camino
   webhookUrl: "/api/lead", // función de Vercel que guarda el lead en Supabase (web/api/lead.js)
   metaPixelId: "",        // ID del pixel de Meta (opcional)
-  paginas: { "ugc": "camino-ugc.html", "negocio": "camino-negocio.html", "marca-personal": "camino-marca-personal.html" },
+  paginas: { "ugc": "/camino-ugc", "negocio": "/camino-negocio", "marca-personal": "/camino-marca-personal" },
   // "No estoy segura" en P1 → pantalla del grupo (whatsappGrupo). Si P3 = "Apenas empiezo" sin otra señal → este camino
   anguloPorDefecto: "negocio"
 };
@@ -303,7 +303,7 @@ function renderAngulo(){
 
   $("#app").innerHTML = `
   <header class="hero"><div class="wrap">
-    <div class="topbar"><a class="brand" href="camino.html"><img src="img/logo-valen.png" alt="Valentina García · Empresaria digital" width="415" height="155"></a><span class="small">Workshop en vivo · 1 hora</span></div>
+    <div class="topbar"><a class="brand" href="/camino"><img src="img/logo-valen.png" alt="Valentina García · Empresaria digital" width="415" height="155"></a><span class="small">Workshop en vivo · 1 hora</span></div>
     <div class="hero-grid">
       <div>
         <p class="hello"><img src="img/valen-avatar.jpg" alt="" width="30" height="30">${nombre ? `${esc(nombre)}, tu camino es` : "Tu camino"} <b>${A.nombre}</b></p>
@@ -443,7 +443,7 @@ function renderAngulo(){
     <div class="others" aria-label="Otros caminos"><span class="small" style="align-self:center">¿No te identificas?</span>${otros.map(k => `<a href="${CONFIG.paginas[k]}">Ver el camino ${ANGULOS[k].nombre}</a>`).join("")}</div>
   </div></section>
 
-  <footer><div class="wrap">© Valentina García · <a href="privacidad.html">Política de tratamiento de datos</a></div></footer>
+  <footer><div class="wrap">© Valentina García · <a href="/privacidad">Política de tratamiento de datos</a></div></footer>
   <div class="sticky"><a class="btn block" href="#oferta">Reservar mi lugar · ${usd(OFERTA.precio)}</a></div>
   <p class="msg ok toast" id="toast" role="status" hidden></p>`;
 
@@ -492,7 +492,7 @@ function renderAngulo(){
       evento("clic_espera");
       toast("Ya estás en la lista. Te avisamos el día de la apertura.");
     } else {
-      location.href = "camino.html" + location.search;
+      location.href = "/camino" + location.search;
     }
   }));
 }

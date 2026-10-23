@@ -20,9 +20,9 @@ Construido por ASYGNUZ. Todo corre en cuentas de Valentina (GitHub, Vercel, Supa
 
 ## Páginas
 
-- `/` → redirige a `/camino.html` conservando las UTM
-- `/camino.html` → entrada con el test
-- `/camino-negocio.html`, `/camino-marca-personal.html`, `/camino-ugc.html`
+- `/` → redirige a `/camino` conservando las UTM
+- `/camino` → entrada con el test
+- `/camino-negocio`, `/camino-marca-personal`, `/camino-ugc`
 
 ## Estado
 

@@ -1,4 +1,4 @@
-// Datos del panel /panel.html: resumen, embudo por UTM, caminos, leads y ventas, filtrados por fechas.
+// Datos del panel /panel: resumen, embudo por UTM, caminos, leads y ventas, filtrados por fechas.
 // Protegido con PANEL_CLAVE (Vercel) en el encabezado x-panel-clave. Incluye datos personales: compartir la clave solo con el equipo.
 // Requiere supabase/003 y 004.
 
