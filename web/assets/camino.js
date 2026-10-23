@@ -23,7 +23,7 @@ const OFERTA = {
   cierre: "",                 // cierre de inscripciones, ej. "miércoles 4 de noviembre, 11:59 p. m."
   plataforma: "YouTube",      // dónde se transmite la clase en vivo
   plazas: "",                 // ej. "150"; si queda vacío dice "Plazas limitadas"
-  replay: "",                 // ej. "Sí. Tendrás la grabación disponible durante 7 días en tu cuenta de Whop."
+  replay: "Sí. La clase queda grabada y tienes acceso de por vida a la grabación y a todos los bonos desde tu cuenta de Whop.",
   diasBonos: "",              // en cuántos días se entregan la clase del camino y el asistente
   garantia: "",               // política de reembolso definida (ver FAQ)
   // Valores de referencia de los bonos (USD), tachados en la oferta. PROPUESTA: confirmar.
@@ -213,14 +213,23 @@ function initReel(){
   let i = 0, started = false;
   tiles.concat(solo).forEach(v => { v.muted = true; v.defaultMuted = true; }); // iOS solo reproduce solo si muted es propiedad, no solo atributo
   const playAll = () => tiles.forEach(v => { if(!v.src) v.src = v.dataset.src; v.play().catch(() => {}); });
-  function ciclo(){
-    reel.classList.remove("is-solo");
-    setTimeout(() => {
-      solo.src = tiles[i].dataset.src; solo.play().catch(() => {});
-      reel.classList.add("is-solo");
-      i = (i + 1) % tiles.length;
-      setTimeout(ciclo, 3800);
-    }, 4200);
+  const espera = ms => new Promise(r => setTimeout(r, ms));
+  // Ritmo: 1) flash rápido de todos los cortes a pantalla completa → 2) aparecen todos juntos → 3) uno por uno en grande.
+  async function ciclo(){
+    for(;;){
+      reel.classList.remove("is-solo", "is-appear"); reel.classList.add("is-flash");
+      for(const t of tiles){ tiles.forEach(x => x.classList.toggle("on", x === t)); await espera(260); }
+      tiles.forEach(x => x.classList.remove("on"));
+      reel.classList.remove("is-flash"); reel.classList.add("is-appear");
+      await espera(2600);
+      for(const t of tiles){
+        solo.src = t.dataset.src; solo.play().catch(() => {});
+        reel.classList.add("is-solo");
+        await espera(1900);
+      }
+      reel.classList.remove("is-solo");
+      await espera(900);
+    }
   }
   new IntersectionObserver(([e]) => {
     if(e.isIntersecting){
@@ -265,6 +274,7 @@ function renderAngulo(){
           <li><span>Workshop</span><span>${esc(OFERTA.titulo)}</span></li>
           <li><span>Fecha</span><span>${tbd(OFERTA.fecha, "Por confirmar")}</span></li>
           <li><span>Duración</span><span>1 hora en vivo, con preguntas</span></li>
+          <li><span>Grabación</span><span>Incluida · acceso de por vida</span></li>
           <li><span>Inversión</span><span><s class="val">${usd(OFERTA.precioRegular)}</s> ${usd(OFERTA.precio)} <span class="cop">${cop()} · precio de lanzamiento</span></span></li>
           <li><span>Cupos</span><span>${plazas}</span></li>
         </ul>
@@ -298,7 +308,7 @@ function renderAngulo(){
 
   <section class="sec-yellow curve-top bio-sec" style="--curve-from:var(--second)"><div class="wrap quote-grid">
     <div class="reel" data-reel aria-label="Videos de Valentina García trabajando">
-      <div class="reel-grid">${CLIPS.map(c => `<video muted playsinline loop preload="none" poster="media/${c}.jpg" data-src="media/${c}.mp4" aria-hidden="true"></video>`).join("")}</div>
+      <div class="reel-grid">${CLIPS.map((c, n) => `<video muted playsinline loop preload="none" poster="media/${c}.jpg" data-src="media/${c}.mp4" style="--i:${n}" aria-hidden="true"></video>`).join("")}</div>
       <div class="reel-solo"><video muted playsinline loop preload="none" aria-hidden="true"></video></div>
       <span class="reel-tag">Procesos reales</span>
     </div>
@@ -333,15 +343,15 @@ function renderAngulo(){
       <p class="eyebrow" style="color:var(--muted)">Tu lugar en el workshop</p>
       <h2 style="font-size:1.6rem">${esc(OFERTA.titulo)}</h2>
       <ul class="stack">
-        <li><span>Workshop en vivo de 1 hora con Valen</span><s class="val">${usd(OFERTA.precioRegular)}</s></li>
+        <li><span>Workshop en vivo de 1 hora con Valen <small class="stack-note">+ grabación con acceso de por vida</small></span><s class="val">${usd(OFERTA.precioRegular)}</s></li>
         <li class="star-line"><span>★ ${A.bono}</span><span class="val-pair"><s class="val">${usd(V.clase)}</s><em class="incl">Incluido</em></span></li>
         <li><span>PDF “Una idea, cinco formatos”</span><span class="val-pair"><s class="val">${usd(V.pdf)}</s><em class="incl">Incluido</em></span></li>
         <li><span>Asistente de ideas con IA</span><span class="val-pair"><s class="val">${usd(V.asistente)}</s><em class="incl">Incluido</em></span></li>
       </ul>
       <p class="total"><span>Valor total</span><s class="val">${usd(OFERTA.precioRegular + totalBonos)}</s></p>
       <p class="price-now"><span style="font-weight:600">Hoy pagas</span><span class="price-pair"><strong>${usd(OFERTA.precio)}</strong><span class="cop">${cop()}</span></span></p>
-      <p class="urgencia">Precio de lanzamiento: <b>todo por ${usd(OFERTA.precio)}</b>, solo en esta edición.</p>
-      <div class="pills"><span>${plazas}</span><span>${OFERTA.fecha ? esc(OFERTA.fecha) : "1 hora en vivo"}</span></div>
+      <p class="urgencia">Precio de lanzamiento: <b>todo por ${usd(OFERTA.precio)}</b>, solo en esta edición. La clase queda grabada y tienes <b>acceso de por vida</b> a todo.</p>
+      <div class="pills"><span>${plazas}</span><span>${OFERTA.fecha ? esc(OFERTA.fecha) : "1 hora en vivo"}</span><span>Acceso de por vida</span></div>
       ${buy(`Reservar mi lugar por ${usd(OFERTA.precio)}`, "block")}
       <p class="small" style="margin:14px 0 0;text-align:center">${cierre}<br>Pago seguro con Whop · Garantía de devolución si no logramos lo prometido</p>
     </div>
