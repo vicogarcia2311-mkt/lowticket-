@@ -49,7 +49,8 @@ module.exports = async (req, res) => {
     await rest("leads?on_conflict=email", { method: "POST", body: completo, prefer: "resolution=merge-duplicates,return=minimal" });
     await avisar(lead.indeciso ? "lead_indeciso" : "lead_nuevo", {
       nombre: lead.nombre, email, whatsapp: lead.whatsapp, angulo: lead.angulo, bloqueo: lead.bloqueo,
-      objetivo: lead.objetivo, situacion: lead.situacion, utm_source: lead.utm_source, utm_campaign: lead.utm_campaign
+      objetivo: lead.objetivo, situacion: lead.situacion,
+      utm_source: lead.utm_source, utm_medium: lead.utm_medium, utm_campaign: lead.utm_campaign, utm_content: lead.utm_content, utm_term: lead.utm_term
     });
     return res.status(201).end();
   } catch (e) {
@@ -59,7 +60,8 @@ module.exports = async (req, res) => {
       await rest("leads", { method: "POST", body: lead, prefer: "return=minimal" });
       await avisar(lead.indeciso ? "lead_indeciso" : "lead_nuevo", {
         nombre: lead.nombre, email, whatsapp: lead.whatsapp, angulo: lead.angulo, bloqueo: lead.bloqueo,
-        objetivo: lead.objetivo, situacion: lead.situacion, utm_source: lead.utm_source, utm_campaign: lead.utm_campaign
+        objetivo: lead.objetivo, situacion: lead.situacion,
+      utm_source: lead.utm_source, utm_medium: lead.utm_medium, utm_campaign: lead.utm_campaign, utm_content: lead.utm_content, utm_term: lead.utm_term
       });
       return res.status(201).end();
     } catch (e2) {
