@@ -19,7 +19,9 @@ const OFERTA = {
   precio: 27,                 // USD
   fecha: "",                  // ej. "Jueves 5 de noviembre · 7:00 p. m. (COL)"
   cierre: "",                 // cierre de inscripciones, ej. "miércoles 4 de noviembre, 11:59 p. m."
-  plazas: "",                 // ej. "150" (depende del plan de Google Meet)
+  plataforma: "YouTube",      // dónde se transmite la clase en vivo
+  plazas: "",                 // ej. "150"; si queda vacío dice "Plazas limitadas"
+  replay: "",                 // ej. "Sí. Tendrás la grabación disponible durante 7 días en tu cuenta de Whop."
   diasBonos: "",              // en cuántos días se entregan la clase del camino y el asistente
   garantia: "",               // política de reembolso definida (ver FAQ)
   // Valores de referencia de los bonos (USD), tachados en la oferta. PROPUESTA: confirmar.
@@ -198,6 +200,34 @@ const ANGULOS = {
   }
 };
 
+const CLIPS = ["clip01","clip02","clip03","clip04","clip05","clip06","clip07","clip08"]; // web/media, 5 s, sin audio
+
+/* Collage de videos de la bio: todos a la vez → uno solo en grande → todos… */
+function initReel(){
+  const reel = $("[data-reel]"); if(!reel) return;
+  const tiles = [...reel.querySelectorAll(".reel-grid video")], solo = reel.querySelector(".reel-solo video");
+  const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let i = 0, started = false;
+  tiles.concat(solo).forEach(v => { v.muted = true; v.defaultMuted = true; }); // iOS solo reproduce solo si muted es propiedad, no solo atributo
+  const playAll = () => tiles.forEach(v => { if(!v.src) v.src = v.dataset.src; v.play().catch(() => {}); });
+  function ciclo(){
+    reel.classList.remove("is-solo");
+    setTimeout(() => {
+      solo.src = tiles[i].dataset.src; solo.play().catch(() => {});
+      reel.classList.add("is-solo");
+      i = (i + 1) % tiles.length;
+      setTimeout(ciclo, 3800);
+    }, 4200);
+  }
+  new IntersectionObserver(([e]) => {
+    if(e.isIntersecting){
+      if(quieto) return;               // con "reducir movimiento" quedan las portadas quietas
+      playAll(); if(reel.classList.contains("is-solo")) solo.play().catch(() => {});
+      if(!started){ started = true; ciclo(); }
+    } else { tiles.concat(solo).forEach(v => v.pause()); }
+  }, {threshold:.25}).observe(reel);
+}
+
 const MARQUEE = ["De una idea a infinitos contenidos","Documenta tu día","Estructura 70/30","Tu camino, no el de otra","Workshop en vivo"].map(t => `<span>${t}</span>`).join("");
 
 /* E · aparición al bajar (se llama después de pintar cada página) */
@@ -257,7 +287,7 @@ function renderAngulo(){
       <div><span class="t">Parte 1</span><div><h3>La estructura</h3><p>Cómo se organiza un perfil que no depende de la inspiración del día.</p></div></div>
       <div><span class="t">Parte 2</span><div><h3>Tu camino</h3><p>Qué cambia en la estructura cuando tu camino es ${A.nombre.toLowerCase()}.</p></div></div>
       <div><span class="t">Parte 3</span><div><h3>Ejercicio en vivo</h3><p>Escribes tu banco de ideas con Valen guiando.</p></div></div>
-      <div><span class="t">Cierre</span><div><h3>Preguntas y respuestas</h3><p>Dudas sobre tu caso, en vivo por Google Meet.</p></div></div>
+      <div><span class="t">Cierre</span><div><h3>Preguntas y respuestas</h3><p>Dudas sobre tu caso, en vivo por ${esc(OFERTA.plataforma)}.</p></div></div>
     </div>
     <p class="small" style="margin:-12px 0 24px"><mark class="tbd">Orden y minutos por confirmar con Valen</mark></p>
     ${toOffer("Quiero salir con mi banco de ideas")}
@@ -298,18 +328,22 @@ function renderAngulo(){
   </div></section>` : ""}
 
   <section class="curve-top" style="--curve-from:var(--accent)"><div class="wrap quote-grid">
-    <div class="quote-photo"><img src="img/valen-portatil.jpg" alt="Valentina Garcia con su portátil" width="1100" height="1460" loading="lazy"></div>
+    <div class="reel" data-reel aria-label="Videos de Valentina García trabajando">
+      <div class="reel-grid">${CLIPS.map(c => `<video muted playsinline loop preload="none" poster="media/${c}.jpg" data-src="media/${c}.mp4" aria-hidden="true"></video>`).join("")}</div>
+      <div class="reel-solo"><video muted playsinline loop preload="none" aria-hidden="true"></video></div>
+      <span class="reel-tag">Procesos reales</span>
+    </div>
     <div>
       <p class="eyebrow">Quién te enseña</p>
       <blockquote>No hay un solo camino de contenido. Hay <em>el tuyo</em>.</blockquote>
-      <p>Valentina Garcia es creadora de contenido y estratega. Documenta su vida y su trabajo para vender, y con ese método construyó una comunidad de más de 18.000 personas en Instagram.</p>
-      <p>Creó DocuSelling, su programa de arquitectura de contenido permanente, y es embajadora de Lapsumit. Enseña estructura y método, sin trucos de viralidad.</p>
+      <p><b>Valentina García</b>, estratega digital y creadora de la metodología DocuSelling.</p>
+      <p>Te enseño a crear contenido perdurable documentando lo que ya haces, sin depender de la viralidad ni de la inspiración. Lidero una comunidad de más de 18.000 personas.</p>
+      <p class="bio-cierre">Aquí no vas a ver teoría, vas a ver <em>procesos reales</em>.</p>
       <ul class="bio-metodo">
         <li><b>Estructura 70/30:</b> 70% contenido permanente, 30% tendencias, audios y conexiones.</li>
         <li><b>Documentar para vender:</b> su día a día es la materia prima de su contenido.</li>
         <li><b>De una idea a infinitos contenidos:</b> cada idea se cuenta en historias, reel, carrusel, TikTok y video largo.</li>
       </ul>
-      <p class="small"><mark class="tbd">Ejemplo real de su perfil (una idea y en qué se convirtió)</mark> ·<mark class="tbd">Dato de los 10K seguidores en mes y medio: solo si se verifica con captura y fechas</mark> · <mark class="tbd">Marcas o clientas con las que ha trabajado</mark></p>
     </div>
   </div></section>
 
@@ -334,11 +368,12 @@ function renderAngulo(){
 
   <section class="curve-top" style="--curve-from:var(--second)"><div class="wrap" style="max-width:820px">
     <h2>Preguntas frecuentes</h2>
-    <details><summary>¿Es en vivo?</summary><p>Sí, por Google Meet. Dura máximo una hora, preguntas incluidas.</p></details>
-    <details><summary>¿Y si no puedo conectarme ese día?</summary><p><mark class="tbd">Política de replay por confirmar.</mark></p></details>
-    <details><summary>¿Necesito experiencia?</summary><p>No. El ejercicio parte de lo que ya haces o quieres hacer.</p></details>
-    <details><summary>¿Cuándo recibo los bonos?</summary><p>El PDF, al inscribirte. La clase de tu camino y el asistente de IA, después del vivo, en ${tbd(OFERTA.diasBonos ? OFERTA.diasBonos + " días" : "", "[X] días")}.</p></details>
-    <details><summary>¿Puedo pedir reembolso?</summary><p>${OFERTA.garantia ? esc(OFERTA.garantia) : `<mark class="tbd">Por definir: propuesta en la conversación (reembolso hasta antes del vivo).</mark>`}</p></details>
+    <details><summary>¿Es en vivo?</summary><p>Sí. La clase es en directo por ${esc(OFERTA.plataforma)}, dura máximo una hora e incluye un espacio para preguntas.</p></details>
+    <details><summary>¿Y si no puedo conectarme ese día?</summary><p>${OFERTA.replay ? esc(OFERTA.replay) : `<mark class="tbd">Si habrá grabación, por cuántos días estará disponible y cómo se accede</mark>`} Si no puedes asistir, te avisaremos cómo acceder al contenido.</p></details>
+    <details><summary>¿Necesito experiencia previa?</summary><p>No. El ejercicio parte de lo que ya haces o de lo que quieres empezar a hacer. Cada persona trabaja con su propio negocio o proyecto.</p></details>
+    <details><summary>¿Qué recibo y cuándo?</summary><p><b>El PDF:</b> inmediatamente después de tu compra.<br><b>La clase de tu camino y el asistente de IA:</b> ${tbd(OFERTA.diasBonos, "[X]")} días después de la clase en vivo.</p></details>
+    <details><summary>¿Tiene garantía?</summary><p>Sí. Si no logramos lo que te prometemos, te devolvemos tu dinero según las condiciones de garantía de Whop.</p></details>
+    ${OFERTA.cierre || OFERTA.plazas ? `<details><summary>¿Hay cupos o fecha límite?</summary><p>${OFERTA.plazas ? `Hay ${esc(OFERTA.plazas)} cupos. ` : ""}${OFERTA.cierre ? `Las inscripciones cierran el ${esc(OFERTA.cierre)}.` : ""}</p></details>` : ""}
   </div></section>
 
   <section class="final wm wm-c sec-yellow curve-top" style="--curve-from:var(--bg)"><div class="wrap">
@@ -377,5 +412,5 @@ function renderAngulo(){
 }
 
 if(document.body.dataset.page === "entrada") initEntrada();
-else if(document.body.dataset.angulo) renderAngulo();
+else if(document.body.dataset.angulo){ renderAngulo(); initReel(); }
 initReveal();
