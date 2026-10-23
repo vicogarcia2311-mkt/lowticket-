@@ -76,7 +76,7 @@ function configurar() {
     ['https://valentinamkt.online/', 'whatsapp', 'grupo', 'workshop-nov', 'mensaje-01']
   ]);
   u.getRange('F2').setFormula(f('=ARRAYFORMULA(IF(A2:A=""§""§A2:A&"?utm_source="&B2:B&"&utm_medium="&C2:C&"&utm_campaign="&D2:D&"&utm_content="&E2:E))'));
-  u.getRange('A6').setValue('Escribe en minúscula y sin espacios (usa guiones). Una fila por publicación o mensaje; copia el link de la columna F.');
+  u.getRange('H1').setValue('Escribe en minúscula y sin espacios (usa guiones). Una fila por publicación o mensaje; copia el link de la columna F.');
   u.setColumnWidth(1, 220); u.setColumnWidth(6, 520);
 
   // La hoja inicial vacía se elimina si existe
