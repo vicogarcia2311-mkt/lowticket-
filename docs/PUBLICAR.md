@@ -14,6 +14,7 @@ Vercel → proyecto → **Settings → Environment Variables**. Marcar *Producti
 |---|---|---|
 | `SUPABASE_URL` | `https://gfbeaflsttyegmnkmaox.supabase.co` | No |
 | `SUPABASE_SECRET_KEY` | Supabase → Project Settings → API Keys → *Secret key* (`sb_secret_…`) o la legacy `service_role` | **Sí** |
+| `WHOP_WEBHOOK_SECRET` | El `webhook_secret` del webhook de ventas de Whop (guardado en el llavero de JM como `whop-valen-webhook`) | **Sí** |
 
 Las claves nunca van en el código: esta repo es pública. Si una clave se expone, regenerarla en Supabase y actualizarla aquí.
 
@@ -41,3 +42,9 @@ En las páginas:
 - [ ] Quitar el header `X-Robots-Tag: noindex` de `web/vercel.json`
 - [ ] Conectar el dominio en Vercel → Settings → Domains
 - [ ] Cambiar `og:image` por la URL completa con dominio
+
+## 5. Webhook de ventas (Whop → Supabase)
+
+- Endpoint: `https://valentinamkt.online/api/venta` (`web/api/venta.js`).
+- Eventos: `payment.succeeded` → venta `aprobada` (cruzada con el lead por correo, toma su `angulo`); `refund.created` → `reembolsada`; `dispute.created` → `contracargo`.
+- Firma verificada (HMAC-SHA256, encabezados `webhook-id`, `webhook-timestamp`, `webhook-signature`); sin `WHOP_WEBHOOK_SECRET` responde 503.
