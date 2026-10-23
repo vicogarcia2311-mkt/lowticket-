@@ -248,3 +248,29 @@ footer{padding:32px 0 48px;color:var(--muted);font-size:.8rem;border-top:1px sol
 .reel-tag{position:absolute;left:12px;bottom:12px;z-index:2;font-weight:600;font-size:.8rem;padding:6px 12px;border-radius:999px;background:var(--accent);border:2px solid var(--ink);box-shadow:0 3px 0 var(--ink)}
 .bio-cierre{font-weight:600;font-size:1.08rem}
 @media (prefers-reduced-motion:reduce){.reel-grid,.reel-solo{transition:none}}
+
+/* Etiqueta única en forma de estrella (sello) sobre la foto */
+.sticker.star{width:118px;height:118px;padding:0;border:0;box-shadow:none;border-radius:0;background:none;display:grid;place-items:center;align-content:center;text-align:center;line-height:1.05;top:-18px;left:-22px;rotate:-10deg;isolation:isolate}
+.sticker.star::before{content:"";position:absolute;inset:0;z-index:-1;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,2 59,18 76,9 77,28 96,30 86,46 98,61 80,67 84,86 65,84 57,99 44,88 29,98 25,79 6,77 14,60 2,47 18,37 12,19 31,20 37,3' fill='%23FFF393' stroke='%23111' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center/contain;filter:drop-shadow(0 3px 0 #111);animation:spinstar 30s linear infinite}
+.sticker.star b{font-weight:700;font-size:1rem;letter-spacing:-.01em}
+.sticker.star small{font-weight:500;font-size:.78rem}
+@keyframes spinstar{to{rotate:350deg}}
+.photo-panel .sticker.star{top:14px;left:14px}
+.cop{display:block;font-size:.8rem;font-weight:500;color:var(--muted)}
+.facts .cop{font-size:.78rem}
+.price-pair{display:flex;flex-direction:column;align-items:flex-end}
+.price-pair .cop{margin-top:4px;font-size:.9rem}
+@media (prefers-reduced-motion:reduce){.sticker.star::before{animation:none}}
+
+/* Bono estrella y valores tachados bien visibles */
+.bono.featured{background:var(--accent-soft);border:2.5px solid var(--ink);box-shadow:0 8px 0 var(--second),0 8px 0 2.5px var(--ink);transform:translateY(-6px)}
+.bono.featured .tag{background:var(--ink);color:var(--accent);font-size:.74rem}
+.bono.featured h3{font-size:1.3rem}
+.lift .bono.featured:hover{transform:translateY(-10px)}
+s.val{color:#3a3a3a;font-weight:600;font-size:1rem;text-decoration:line-through;text-decoration-thickness:2.5px;text-decoration-color:var(--ink)}
+.val-pair{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.incl{font-style:normal;font-weight:700;font-size:.78rem;background:var(--second);border:1.5px solid var(--ink);border-radius:999px;padding:2px 9px;color:var(--ink)}
+.bono .when{align-items:center}
+.stack s.val{font-size:1rem}
+.total s.val{font-size:1.15rem}
+.stack .star-line{font-weight:600;background:var(--accent-soft);margin:0 -10px;padding:12px 10px;border-radius:10px}

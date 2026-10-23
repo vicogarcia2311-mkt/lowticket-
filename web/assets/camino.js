@@ -17,6 +17,7 @@ const CONFIG = {
 const OFERTA = {
   titulo: "De una idea a infinitos contenidos",
   precio: 27,                 // USD
+  precioCOP: "88.500",        // referencia en pesos colombianos (Whop cobra al cambio del día, hoy ≈ COP 88.496)
   fecha: "",                  // ej. "Jueves 5 de noviembre · 7:00 p. m. (COL)"
   cierre: "",                 // cierre de inscripciones, ej. "miércoles 4 de noviembre, 11:59 p. m."
   plataforma: "YouTube",      // dónde se transmite la clase en vivo
@@ -37,6 +38,7 @@ const $ = (s, el) => (el || document).querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const tbd = (v, ph) => v ? esc(v) : `<mark class="tbd">${ph}</mark>`;
 const usd = n => `USD ${n}`;
+const cop = () => OFERTA.precioCOP ? `≈ $${OFERTA.precioCOP} COP` : "";
 function ss(k, v){ try{ if(v === undefined) return JSON.parse(sessionStorage.getItem(k) || "null"); sessionStorage.setItem(k, JSON.stringify(v)); }catch(e){ return null; } }
 document.querySelectorAll("[data-ws-title]").forEach(el => el.textContent = OFERTA.titulo);
 
@@ -262,12 +264,12 @@ function renderAngulo(){
           <li><span>Workshop</span><span>${esc(OFERTA.titulo)}</span></li>
           <li><span>Fecha</span><span>${tbd(OFERTA.fecha, "Por confirmar")}</span></li>
           <li><span>Duración</span><span>1 hora en vivo, con preguntas</span></li>
-          <li><span>Inversión</span><span>${usd(OFERTA.precio)}</span></li>
+          <li><span>Inversión</span><span>${usd(OFERTA.precio)} <span class="cop">${cop()}</span></span></li>
           <li><span>Cupos</span><span>${plazas}</span></li>
         </ul>
         <div class="cta-row">${toOffer("Reservar mi lugar")}${OFERTA.cierre ? `<span class="small">${cierre}</span>` : ""}</div>
       </div>
-      <div class="photo-wrap"><div class="hero-photo" style="display:block"><img src="${A.img}" alt="Valentina Garcia" width="1100" height="1460" fetchpriority="high"></div><span class="sticker s1">En vivo</span><span class="sticker s2">1 hora</span><span class="sticker s3">${usd(OFERTA.precio)}</span></div>
+      <div class="photo-wrap"><div class="hero-photo" style="display:block"><img src="${A.img}" alt="Valentina Garcia" width="1100" height="1460" fetchpriority="high"></div><span class="sticker star"><b>En vivo</b><small>1 hora</small></span></div>
     </div>
   </div></header>
 
@@ -297,9 +299,9 @@ function renderAngulo(){
     <p class="eyebrow">Incluido con tu lugar</p>
     <h2 class="reveal">Tres bonos, <em>uno</em> hecho para tu camino</h2>
     <div class="bonos" style="margin-top:28px">
-      <div class="card bono featured reveal"><span class="tag">Bono de tu camino</span><p class="obj">${A.bonoObj}</p><h3>${A.bono}</h3><p>${A.bonoDesc}</p><p class="when"><span>Llega ${tbd(OFERTA.diasBonos ? `en ${OFERTA.diasBonos} días` : "", "en [X] días")} después del vivo</span><s class="val">${usd(V.clase)}</s></p></div>
-      <div class="card bono reveal"><span class="tag">Bono 2</span><p class="obj">Para la duda de “no tengo tiempo de crear tanto”</p><h3>PDF “Una idea, cinco formatos”</h3><p>Checklist para contar la misma idea en historias, reel, carrusel, TikTok y video largo o blog, con un ejemplo ya lleno.</p><p class="when"><span>Lo recibes al inscribirte</span><s class="val">${usd(V.pdf)}</s></p></div>
-      <div class="card bono reveal"><span class="tag">Bono 3</span><p class="obj">Para la duda de “¿y cuando se me acaben las ideas?”</p><h3>Tu asistente de ideas con IA</h3><p>Escribes una idea y recibes 3 o 4 opciones de contenido en los cinco formatos.</p><p class="when"><span>Se activa después del vivo · <mark class="tbd">límite de uso</mark></span><s class="val">${usd(V.asistente)}</s></p></div>
+      <div class="card bono featured reveal"><span class="tag">★ Bono estrella · tu camino</span><p class="obj">${A.bonoObj}</p><h3>${A.bono}</h3><p>${A.bonoDesc}</p><p class="when"><span>Llega ${tbd(OFERTA.diasBonos ? `en ${OFERTA.diasBonos} días` : "", "en [X] días")} después del vivo</span><span class="val-pair"><s class="val">${usd(V.clase)}</s><em class="incl">Incluido</em></span></p></div>
+      <div class="card bono reveal"><span class="tag">Bono 2</span><p class="obj">Para la duda de “no tengo tiempo de crear tanto”</p><h3>PDF “Una idea, cinco formatos”</h3><p>Checklist para contar la misma idea en historias, reel, carrusel, TikTok y video largo o blog, con un ejemplo ya lleno.</p><p class="when"><span>Lo recibes al inscribirte</span><span class="val-pair"><s class="val">${usd(V.pdf)}</s><em class="incl">Incluido</em></span></p></div>
+      <div class="card bono reveal"><span class="tag">Bono 3</span><p class="obj">Para la duda de “¿y cuando se me acaben las ideas?”</p><h3>Tu asistente de ideas con IA</h3><p>Escribes una idea y recibes 3 o 4 opciones de contenido en los cinco formatos.</p><p class="when"><span>Se activa después del vivo · <mark class="tbd">límite de uso</mark></span><span class="val-pair"><s class="val">${usd(V.asistente)}</s><em class="incl">Incluido</em></span></p></div>
     </div>
   </div></section>
 
@@ -309,15 +311,15 @@ function renderAngulo(){
       <h2 style="font-size:1.6rem">${esc(OFERTA.titulo)}</h2>
       <ul class="stack">
         <li><span>Workshop en vivo de 1 hora con Valen</span><span>${usd(OFERTA.precio)}</span></li>
-        <li><span>${A.bono}</span><s class="val">${usd(V.clase)}</s></li>
-        <li><span>PDF “Una idea, cinco formatos”</span><s class="val">${usd(V.pdf)}</s></li>
-        <li><span>Asistente de ideas con IA</span><s class="val">${usd(V.asistente)}</s></li>
+        <li class="star-line"><span>★ ${A.bono}</span><span class="val-pair"><s class="val">${usd(V.clase)}</s><em class="incl">Incluido</em></span></li>
+        <li><span>PDF “Una idea, cinco formatos”</span><span class="val-pair"><s class="val">${usd(V.pdf)}</s><em class="incl">Incluido</em></span></li>
+        <li><span>Asistente de ideas con IA</span><span class="val-pair"><s class="val">${usd(V.asistente)}</s><em class="incl">Incluido</em></span></li>
       </ul>
       <p class="total"><span>Valor total</span><s class="val">${usd(OFERTA.precio + totalBonos)}</s></p>
-      <p class="price-now"><span style="font-weight:600">Hoy pagas</span><strong>${usd(OFERTA.precio)}</strong></p>
+      <p class="price-now"><span style="font-weight:600">Hoy pagas</span><span class="price-pair"><strong>${usd(OFERTA.precio)}</strong><span class="cop">${cop()}</span></span></p>
       <div class="pills"><span>${plazas}</span><span>${OFERTA.fecha ? esc(OFERTA.fecha) : "1 hora en vivo"}</span></div>
       ${buy(`Reservar mi lugar por ${usd(OFERTA.precio)}`, "block")}
-      <p class="small" style="margin:14px 0 0;text-align:center">${cierre}<br>Pago seguro · ${OFERTA.garantia ? esc(OFERTA.garantia) : `<mark class="tbd">política de reembolso por definir</mark>`}</p>
+      <p class="small" style="margin:14px 0 0;text-align:center">${cierre}<br>Pago seguro con Whop · Garantía de devolución si no logramos lo prometido</p>
     </div>
   </div></section>
 
