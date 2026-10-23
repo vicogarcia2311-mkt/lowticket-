@@ -301,3 +301,6 @@ s.val{color:#3a3a3a;font-weight:600;font-size:1rem;text-decoration:line-through;
 /* etiqueta legible sobre amarillo */
 .bio-sec .bio-label{color:var(--accent)}
 .stack-note{display:block;font-size:.78rem;color:var(--muted);font-weight:500}
+.estado-msg{background:var(--second);border:1.5px solid var(--ink);border-radius:12px;padding:12px 14px;margin:0 0 14px;font-size:.95rem}
+.estado-msg[hidden]{display:none}
+footer a{color:inherit}

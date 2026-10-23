@@ -28,7 +28,7 @@ Regla ASYGNUZ: los agentes de IA no leen los datos de clientes. Las pruebas se h
 
 En `web/assets/camino.js`:
 
-- [x] `CONFIG.checkoutWorkshop` → Whop `plan_nkY3ynh3G9wOr` (producto `prod_n9hWq5KyyOxNa`, oculto en la tienda, solo por link). Antes de abrir ventas: verificar el negocio en Whop para poder cobrar y retirar
+- [x] El link de pago ya no está en el código: lo entrega `/api/config` solo con el carrito abierto (ver sección 6).
 - [ ] `CONFIG.whatsappGrupo` → link del grupo de asesoría
 - [ ] `CONFIG.metaPixelId` → pixel de Meta (opcional)
 - [ ] `OFERTA.fecha`, `OFERTA.cierre`, `OFERTA.plazas`, `OFERTA.diasBonos`, `OFERTA.garantia`
@@ -48,3 +48,21 @@ En las páginas:
 - Endpoint: `https://valentinamkt.online/api/venta` (`web/api/venta.js`).
 - Eventos: `payment.succeeded` → venta `aprobada` (cruzada con el lead por correo, toma su `angulo`); `refund.created` → `reembolsada`; `dispute.created` → `contracargo`.
 - Firma verificada (HMAC-SHA256, encabezados `webhook-id`, `webhook-timestamp`, `webhook-signature`); sin `WHOP_WEBHOOK_SECRET` responde 503.
+
+## 6. Modo espera y apertura (20 nov 2026, 12:00 m. hora Colombia)
+
+`/api/config` decide el estado: `espera` antes de la apertura, `abierto` después, `cerrado` desde `CIERRE_ISO`. En espera la página muestra el precio, "Ya estás en la lista" y la fecha; no hay botón de compra.
+
+Variables en Vercel:
+
+| Nombre | Valor |
+|---|---|
+| `APERTURA_ISO` | opcional; por defecto `2026-11-20T12:00:00-05:00` |
+| `CIERRE_ISO` | inicio de la clase, ej. `2026-11-28T19:00:00-05:00` (hora por definir) |
+| `CHECKOUT_URL` | link de pago de Whop del plan activo |
+| `ESTADO_LANZAMIENTO` | opcional, fuerza `espera`, `abierto` o `cerrado` |
+
+Antes de la apertura: reactivar el plan en Whop (hoy archivado para que nadie compre antes) o crear uno nuevo, y poner su link en `CHECKOUT_URL`. Sin `CHECKOUT_URL` la página sigue en espera aunque llegue la fecha.
+
+## 7. Supabase: 002
+Correr `supabase/002_leads_unicos_consentimiento.sql`: un lead por correo (se actualiza si repite el test) y evidencia del consentimiento (fecha y versión de la política). Mientras no se corra, los leads se siguen guardando como filas nuevas.

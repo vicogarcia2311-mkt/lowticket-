@@ -5,7 +5,8 @@
 
 const CONFIG = {
   // === COMPLETAR ANTES DE PUBLICAR ===
-  checkoutWorkshop: "https://whop.com/checkout/plan_nkY3ynh3G9wOr", // Whop · producto prod_n9hWq5KyyOxNa · USD 27 pago único
+  // El link de pago NO va aquí: lo entrega /api/config solo cuando el carrito está abierto (variable CHECKOUT_URL en Vercel).
+  politicaVersion: "2026-10-23-borrador", // versión de la política de datos que acepta cada lead
   whatsappGrupo: "",      // grupo de WhatsApp donde el equipo orienta a quien no sabe su camino
   webhookUrl: "/api/lead", // función de Vercel que guarda el lead en Supabase (web/api/lead.js)
   metaPixelId: "",        // ID del pixel de Meta (opcional)
@@ -19,8 +20,8 @@ const OFERTA = {
   precio: 27,                 // USD, precio de lanzamiento (solo esta edición)
   precioRegular: 35,          // USD, precio normal del workshop (tachado)
   precioCOP: "88.500",        // referencia en pesos colombianos (Whop cobra al cambio del día, hoy ≈ COP 88.496)
-  fecha: "",                  // ej. "Jueves 5 de noviembre · 7:00 p. m. (COL)"
-  cierre: "",                 // cierre de inscripciones, ej. "miércoles 4 de noviembre, 11:59 p. m."
+  fecha: "Sábado 28 de noviembre", // agregar la hora cuando se defina
+  cierre: "sábado 28 de noviembre, al empezar la clase",
   plataforma: "YouTube",      // dónde se transmite la clase en vivo
   plazas: "",                 // ej. "150"; si queda vacío dice "Plazas limitadas"
   replay: "Sí. La clase queda grabada y tienes acceso de por vida a la grabación y a todos los bonos desde tu cuenta de Whop.",
@@ -40,6 +41,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">"
 const tbd = (v, ph) => v ? esc(v) : `<mark class="tbd">${ph}</mark>`;
 const usd = n => `USD ${n}`;
 const cop = () => OFERTA.precioCOP ? `≈ $${OFERTA.precioCOP} COP` : "";
+function ls(k, v){ try{ if(v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); }catch(e){ return null; } }
 function ss(k, v){ try{ if(v === undefined) return JSON.parse(sessionStorage.getItem(k) || "null"); sessionStorage.setItem(k, JSON.stringify(v)); }catch(e){ return null; } }
 document.querySelectorAll("[data-ws-title]").forEach(el => el.textContent = OFERTA.titulo);
 
@@ -62,14 +64,31 @@ function checkoutUrl(base, angulo){
   url.searchParams.set("sck", [p.utm_campaign || "", p.utm_content || "", angulo || ""].join("|"));
   return url.toString();
 }
-function send(payload){
-  if(!CONFIG.webhookUrl) return Promise.resolve(false);
-  const body = JSON.stringify(Object.assign({ts:new Date().toISOString(), page:location.pathname}, payload));
-  try{
-    if(payload.event === "click" && navigator.sendBeacon){ navigator.sendBeacon(CONFIG.webhookUrl, body); return Promise.resolve(true); }
-    return fetch(CONFIG.webhookUrl, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"}, body}).then(()=>true).catch(()=>false);
-  }catch(e){ return Promise.resolve(false); }
+async function post(body){
+  try{ const r = await fetch(CONFIG.webhookUrl, {method:"POST", headers:{"Content-Type":"application/json"}, body}); return r.ok; }
+  catch(e){ return false; }
 }
+// Clics: sin esperar respuesta. Leads: se confirma que /api/lead los guardó; si falla se reintenta y, si sigue fallando, queda en cola en el navegador.
+async function send(payload){
+  if(!CONFIG.webhookUrl) return false;
+  const body = JSON.stringify(Object.assign({ts:new Date().toISOString(), page:location.pathname}, payload));
+  if(payload.event !== "lead"){
+    try{ if(navigator.sendBeacon) return navigator.sendBeacon(CONFIG.webhookUrl, body); }catch(e){}
+    post(body); return true;
+  }
+  for(let i = 0; i < 3; i++){
+    if(await post(body)) return true;
+    await new Promise(r => setTimeout(r, 600 * (i + 1)));
+  }
+  const cola = ls("vm_cola") || []; cola.push(body); ls("vm_cola", cola.slice(-5));
+  return false;
+}
+(async function vaciarCola(){
+  const cola = ls("vm_cola"); if(!cola || !cola.length || !CONFIG.webhookUrl) return;
+  const quedan = [];
+  for(const b of cola) if(!(await post(b))) quedan.push(b);
+  ls("vm_cola", quedan);
+})();
 if(CONFIG.metaPixelId){
   !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
   fbq('init', CONFIG.metaPixelId); fbq('track','PageView');
@@ -155,11 +174,12 @@ function initEntrada(){
     const indeciso = respuestas.objetivo === null; // eligió "No estoy segura": va al grupo, no a una página de camino
     const angulo = indeciso ? "por-definir" : asignarAngulo(respuestas);
     const lead = { nombre: d.nombre.trim(), email: d.email.trim(), angulo, bloqueo: etiquetas.bloqueo || "", indeciso };
-    ss("vm_lead", lead);
+    ss("vm_lead", lead); ls("vm_lead", lead);
     go(indeciso ? steps.indexOf($("[data-grupo-step]")) : steps.length - 1);
     await send(Object.assign({ event:"lead", producto:"Workshop " + OFERTA.titulo,
       nombre: lead.nombre, email: lead.email, whatsapp: tel, angulo, bloqueo: lead.bloqueo, indeciso,
-      objetivo: etiquetas.objetivo || "", situacion: etiquetas.situacion || "" }, currentParams()));
+      objetivo: etiquetas.objetivo || "", situacion: etiquetas.situacion || "",
+      consentimiento: true, consentimiento_at: new Date().toISOString(), politica_version: OFERTA.politicaVersion }, currentParams()));
     track("Lead", {content_category: angulo});
     if(!indeciso) setTimeout(() => { location.href = CONFIG.paginas[angulo]; }, 900);
   });
@@ -252,14 +272,14 @@ function initReveal(){
 
 function renderAngulo(){
   const key = document.body.dataset.angulo, A = ANGULOS[key];
-  const lead = ss("vm_lead") || {};
+  const lead = ss("vm_lead") || ls("vm_lead") || {};
   const nombre = (lead.nombre || "").split(" ")[0];
   const V = OFERTA.valores, totalBonos = V.clase + V.pdf + V.asistente;
   const otros = Object.keys(ANGULOS).filter(k => k !== key);
   const toOffer = (label, cls) => `<a class="btn ${cls || ""}" href="#oferta">${label} <span class="arrow" aria-hidden="true">→</span></a>`;
   const buy = (label, cls) => `<a class="btn ${cls || ""}" href="#" data-buy>${label} <span class="arrow" aria-hidden="true">→</span></a>`;
   const cierre = OFERTA.cierre ? `Inscripciones abiertas hasta el ${esc(OFERTA.cierre)}` : `<mark class="tbd">Cierre de inscripciones por confirmar</mark>`;
-  const plazas = OFERTA.plazas ? `${esc(OFERTA.plazas)} plazas` : "Plazas limitadas";
+  const plazas = OFERTA.plazas ? `${esc(OFERTA.plazas)} plazas` : "";
 
   $("#app").innerHTML = `
   <header class="hero"><div class="wrap">
@@ -276,7 +296,7 @@ function renderAngulo(){
           <li><span>Duración</span><span>1 hora en vivo, con preguntas</span></li>
           <li><span>Grabación</span><span>Incluida · acceso de por vida</span></li>
           <li><span>Inversión</span><span><s class="val">${usd(OFERTA.precioRegular)}</s> ${usd(OFERTA.precio)} <span class="cop">${cop()} · precio de lanzamiento</span></span></li>
-          <li><span>Cupos</span><span>${plazas}</span></li>
+          ${plazas ? `<li><span>Cupos</span><span>${plazas}</span></li>` : ""}
         </ul>
         <div class="cta-row">${toOffer("Reservar mi lugar")}${OFERTA.cierre ? `<span class="small">${cierre}</span>` : ""}</div>
       </div>
@@ -351,9 +371,10 @@ function renderAngulo(){
       <p class="total"><span>Valor total</span><s class="val">${usd(OFERTA.precioRegular + totalBonos)}</s></p>
       <p class="price-now"><span style="font-weight:600">Hoy pagas</span><span class="price-pair"><strong>${usd(OFERTA.precio)}</strong><span class="cop">${cop()}</span></span></p>
       <p class="urgencia">Precio de lanzamiento: <b>todo por ${usd(OFERTA.precio)}</b>, solo en esta edición. La clase queda grabada y tienes <b>acceso de por vida</b> a todo.</p>
-      <div class="pills"><span>${plazas}</span><span>${OFERTA.fecha ? esc(OFERTA.fecha) : "1 hora en vivo"}</span><span>Acceso de por vida</span></div>
+      <div class="pills">${plazas ? `<span>${plazas}</span>` : ""}<span>${OFERTA.fecha ? esc(OFERTA.fecha) : "1 hora en vivo"}</span><span>Acceso de por vida</span></div>
+      <p class="estado-msg" data-estado-msg hidden></p>
       ${buy(`Reservar mi lugar por ${usd(OFERTA.precio)}`, "block")}
-      <p class="small" style="margin:14px 0 0;text-align:center">${cierre}<br>Pago seguro con Whop · Garantía de devolución si no logramos lo prometido</p>
+      <p class="small" style="margin:14px 0 0;text-align:center"><span data-estado-texto>${cierre}</span><br>Pago seguro con Whop · Garantía de devolución si no logramos lo prometido</p>
     </div>
   </div></section>
 
@@ -398,11 +419,11 @@ function renderAngulo(){
     <h2>Una hora para salir con tu <em>banco de ideas</em></h2>
     <p class="lead" style="margin:0 auto 28px">Tu estructura, tu camino ${A.nombre.toLowerCase()} y tus primeras ideas, armadas en vivo con Valen.</p>
     ${buy(`Reservar mi lugar por ${usd(OFERTA.precio)}`)}
-    <p class="small" style="margin-top:16px">${cierre} · ${plazas}</p>
+    <p class="small" style="margin-top:16px" data-estado-texto>${cierre}${plazas ? " · " + plazas : ""}</p>
     <div class="others" aria-label="Otros caminos"><span class="small" style="align-self:center">¿No te identificas?</span>${otros.map(k => `<a href="${CONFIG.paginas[k]}">Ver el camino ${ANGULOS[k].nombre}</a>`).join("")}</div>
   </div></section>
 
-  <footer><div class="wrap">© Valentina Garcia · <mark class="tbd">Política de privacidad y términos (enlaces)</mark></div></footer>
+  <footer><div class="wrap">© Valentina García · <a href="privacidad.html">Política de tratamiento de datos</a></div></footer>
   <div class="sticky"><a class="btn block" href="#oferta">Reservar mi lugar · ${usd(OFERTA.precio)}</a></div>
   <p class="msg ok toast" id="toast" role="status" hidden></p>`;
 
@@ -414,17 +435,45 @@ function renderAngulo(){
   });
   io.observe($(".hero")); io.observe($("#oferta"));
 
-  document.querySelectorAll("[data-buy]").forEach(b => b.addEventListener("click", e => {
-    e.preventDefault();
-    send({event:"click", accion:"checkout", angulo:key});
-    track("InitiateCheckout", {content_category:key, value:OFERTA.precio, currency:"USD"});
-    if(!CONFIG.checkoutWorkshop){
-      const t = $("#toast"); t.textContent = "Modo borrador: falta el enlace de checkout en CONFIG."; t.hidden = false;
-      setTimeout(() => t.hidden = true, 3500); return;
+  // Estado del lanzamiento: hasta confirmar que está "abierto" la página se comporta como "espera".
+  let estado = { estado: "espera", apertura: "2026-11-20T12:00:00-05:00", checkoutUrl: null };
+  const btns = [...document.querySelectorAll("[data-buy]")], msg = $("[data-estado-msg]");
+  const toast = t => { const el = $("#toast"); el.textContent = t; el.hidden = false; setTimeout(() => el.hidden = true, 4500); };
+  function aplicarEstado(){
+    const fechaAp = new Date(estado.apertura).toLocaleString("es-CO", { timeZone:"America/Bogota", weekday:"long", day:"numeric", month:"long", hour:"numeric", minute:"2-digit" });
+    if(estado.estado === "abierto"){
+      msg.hidden = true;
+      btns.forEach(b => b.innerHTML = `Reservar mi lugar por ${usd(OFERTA.precio)} <span class="arrow" aria-hidden="true">→</span>`);
+      return;
     }
-    const url = new URL(checkoutUrl(CONFIG.checkoutWorkshop, key));
-    if(lead.email) url.searchParams.set("email", lead.email);
-    location.href = url.toString();
+    const cerrado = estado.estado === "cerrado";
+    const texto = cerrado ? "Inscripciones cerradas"
+      : lead.email ? `Ya estás en la lista. Las inscripciones abren el ${fechaAp}` : `Las inscripciones abren el ${fechaAp}`;
+    msg.innerHTML = cerrado ? "Las inscripciones de esta edición ya cerraron. Déjanos tus datos y te avisamos de la próxima."
+      : lead.email ? `<b>Ya estás en la lista.</b> Las inscripciones abren el <b>${fechaAp}</b> (hora Colombia). Te avisamos por WhatsApp y correo con tu link directo.`
+      : `Las inscripciones abren el <b>${fechaAp}</b> (hora Colombia). Haz el test y entra a la lista para recibir tu link directo.`;
+    msg.hidden = false;
+    document.querySelectorAll("[data-estado-texto]").forEach(el => el.textContent = texto);
+    btns.forEach(b => b.innerHTML = (cerrado || !lead.email) ? `Entrar a la lista <span class="arrow" aria-hidden="true">→</span>` : `Ya estoy en la lista ✓`);
+    $(".sticky a").textContent = "Abre el 20 de nov · " + usd(OFERTA.precio);
+  }
+  aplicarEstado();
+  fetch("/api/config").then(r => r.ok ? r.json() : null).then(c => { if(c){ estado = c; aplicarEstado(); } }).catch(() => {});
+
+  btns.forEach(b => b.addEventListener("click", e => {
+    e.preventDefault();
+    if(estado.estado === "abierto" && estado.checkoutUrl){
+      send({event:"click", accion:"checkout", angulo:key});
+      track("InitiateCheckout", {content_category:key, value:OFERTA.precio, currency:"USD"});
+      const url = new URL(checkoutUrl(estado.checkoutUrl, key));
+      if(lead.email) url.searchParams.set("email", lead.email);
+      location.href = url.toString();
+    } else if(lead.email && estado.estado !== "cerrado"){
+      send({event:"click", accion:"clic_espera", angulo:key});
+      toast("Ya estás en la lista. Te avisamos el día de la apertura.");
+    } else {
+      location.href = "camino.html" + location.search;
+    }
   }));
 }
 

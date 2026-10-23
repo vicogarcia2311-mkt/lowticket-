@@ -37,7 +37,7 @@ function firmaValida(secret, id, ts, body, header) {
 
 async function leadPorEmail(email) {
   if (!email) return null;
-  const q = `leads?select=id,angulo&email=ilike.${encodeURIComponent(email)}&order=created_at.desc&limit=1`;
+  const q = `leads?select=id,angulo&email=eq.${encodeURIComponent(email.toLowerCase())}&order=created_at.desc&limit=1`;
   const rows = await rest(q);
   return rows && rows[0] ? rows[0] : null;
 }
