@@ -49,16 +49,20 @@ En las páginas:
 - Eventos: `payment.succeeded` → venta `aprobada` (cruzada con el lead por correo, toma su `angulo`); `refund.created` → `reembolsada`; `dispute.created` → `contracargo`.
 - Firma verificada (HMAC-SHA256, encabezados `webhook-id`, `webhook-timestamp`, `webhook-signature`); sin `WHOP_WEBHOOK_SECRET` responde 503.
 
-## 6. Modo espera y apertura (20 nov 2026, 12:00 m. hora Colombia)
+## 6. Modo espera y apertura
 
-`/api/config` decide el estado: `espera` antes de la apertura, `abierto` después, `cerrado` desde `CIERRE_ISO`. En espera la página muestra el precio, "Ya estás en la lista" y la fecha; no hay botón de compra.
+Las fechas son reservadas (campaña de expectativa): viven en el vault y en las variables de Vercel, nunca en esta repo pública.
+
+`/api/config` decide el estado: `espera` antes de la apertura, `abierto` después, `cerrado` desde `CIERRE_ISO`. En espera la página muestra el precio y "Ya estás en la lista", sin fechas ni botón de compra.
 
 Variables en Vercel:
 
 | Nombre | Valor |
 |---|---|
-| `APERTURA_ISO` | opcional; por defecto `2026-11-20T12:00:00-05:00` |
-| `CIERRE_ISO` | inicio de la clase, ej. `2026-11-28T19:00:00-05:00` (hora por definir) |
+| `APERTURA_ISO` | fecha y hora de apertura, ISO con zona `-05:00`. Sin ella la página queda en espera |
+| `CIERRE_ISO` | fecha y hora de cierre (inicio de la clase) |
+| `FECHA_CLASE_TEXTO` | fecha de la clase en texto; solo se muestra con el carrito abierto |
+| `CIERRE_TEXTO` | texto del cierre de inscripciones; solo se muestra con el carrito abierto |
 | `CHECKOUT_URL` | link de pago de Whop del plan activo |
 | `ESTADO_LANZAMIENTO` | opcional, fuerza `espera`, `abierto` o `cerrado` |
 

@@ -304,3 +304,10 @@ s.val{color:#3a3a3a;font-weight:600;font-size:1rem;text-decoration:line-through;
 .estado-msg{background:var(--second);border:1.5px solid var(--ink);border-radius:12px;padding:12px 14px;margin:0 0 14px;font-size:.95rem}
 .estado-msg[hidden]{display:none}
 footer a{color:inherit}
+.tel-row{display:flex;gap:8px}
+.tel-row select{flex:0 0 auto;max-width:46%;min-height:52px;padding:10px 10px;border:1.5px solid #A9A6A0;border-radius:12px;font:inherit;font-size:.92rem;background:#fff;color:var(--ink)}
+.tel-row input{flex:1;min-width:0}
+/* Valor total tachado bien visible */
+.total{align-items:center;color:var(--ink);font-weight:600;font-size:1.05rem}
+.total s.val{font-size:1.6rem;font-weight:700;color:var(--ink);text-decoration-thickness:3px;text-decoration-color:#E5484D}
+.stack s.val{color:#222;text-decoration-color:#E5484D}

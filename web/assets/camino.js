@@ -20,11 +20,10 @@ const OFERTA = {
   precio: 27,                 // USD, precio de lanzamiento (solo esta edición)
   precioRegular: 35,          // USD, precio normal del workshop (tachado)
   precioCOP: "88.500",        // referencia en pesos colombianos (Whop cobra al cambio del día, hoy ≈ COP 88.496)
-  fecha: "Sábado 28 de noviembre", // agregar la hora cuando se defina
-  cierre: "sábado 28 de noviembre, al empezar la clase",
+  // Fechas reservadas (campaña de expectativa): no van aquí. Las entrega /api/config solo con el carrito abierto.
   plataforma: "YouTube",      // dónde se transmite la clase en vivo
   plazas: "",                 // ej. "150"; si queda vacío dice "Plazas limitadas"
-  replay: "Sí. La clase queda grabada y tienes acceso de por vida a la grabación y a todos los bonos desde tu cuenta de Whop.",
+  replay: "Sí. La clase queda grabada y tienes acceso de por vida a la grabación, a la clase de tu camino y al PDF desde tu cuenta de Whop.",
   diasBonos: "",              // en cuántos días se entregan la clase del camino y el asistente
   garantia: "",               // política de reembolso definida (ver FAQ)
   // Valores de referencia de los bonos (USD), tachados en la oferta. PROPUESTA: confirmar.
@@ -166,10 +165,13 @@ function initEntrada(){
   form.addEventListener("submit", async e => {
     e.preventDefault(); msg.hidden = true;
     const d = Object.fromEntries(new FormData(form).entries());
-    const tel = (d.whatsapp || "").replace(/[^\d+]/g, "");
-    const bad = { nombre: !d.nombre.trim(), email: !/^\S+@\S+\.\S+$/.test(d.email || ""), whatsapp: tel.replace(/\D/g,"").length < 10 };
+    // WhatsApp = código del país elegido + número local (si la persona escribe el número con "+", se respeta tal cual).
+    const crudo = (d.whatsapp || "").trim();
+    const local = crudo.replace(/\D/g, "").replace(/^0+/, "");
+    const tel = crudo.startsWith("+") ? "+" + crudo.replace(/\D/g, "") : (d.pais || "+57") + local;
+    const bad = { nombre: !d.nombre.trim(), email: !/^\S+@\S+\.\S+$/.test(d.email || ""), whatsapp: tel.replace(/\D/g,"").length < 8 || local.length < 6 };
     Object.keys(bad).forEach(k => form[k].setAttribute("aria-invalid", bad[k] ? "true" : "false"));
-    if(bad.nombre || bad.email || bad.whatsapp){ showMsg("Revisa tu nombre, tu correo y tu WhatsApp con código de país."); return; }
+    if(bad.nombre || bad.email || bad.whatsapp){ showMsg("Revisa tu nombre, tu correo y tu número de WhatsApp."); return; }
     if(!form.consent.checked){ showMsg("Necesitamos tu autorización para tratar tus datos."); return; }
     const indeciso = respuestas.objetivo === null; // eligió "No estoy segura": va al grupo, no a una página de camino
     const angulo = indeciso ? "por-definir" : asignarAngulo(respuestas);
@@ -179,7 +181,7 @@ function initEntrada(){
     await send(Object.assign({ event:"lead", producto:"Workshop " + OFERTA.titulo,
       nombre: lead.nombre, email: lead.email, whatsapp: tel, angulo, bloqueo: lead.bloqueo, indeciso,
       objetivo: etiquetas.objetivo || "", situacion: etiquetas.situacion || "",
-      consentimiento: true, consentimiento_at: new Date().toISOString(), politica_version: OFERTA.politicaVersion }, currentParams()));
+      consentimiento: true, consentimiento_at: new Date().toISOString(), politica_version: CONFIG.politicaVersion }, currentParams()));
     track("Lead", {content_category: angulo});
     if(!indeciso) setTimeout(() => { location.href = CONFIG.paginas[angulo]; }, 900);
   });
@@ -278,7 +280,7 @@ function renderAngulo(){
   const otros = Object.keys(ANGULOS).filter(k => k !== key);
   const toOffer = (label, cls) => `<a class="btn ${cls || ""}" href="#oferta">${label} <span class="arrow" aria-hidden="true">→</span></a>`;
   const buy = (label, cls) => `<a class="btn ${cls || ""}" href="#" data-buy>${label} <span class="arrow" aria-hidden="true">→</span></a>`;
-  const cierre = OFERTA.cierre ? `Inscripciones abiertas hasta el ${esc(OFERTA.cierre)}` : `<mark class="tbd">Cierre de inscripciones por confirmar</mark>`;
+  const cierre = "";  // lo completa aplicarEstado() según el estado del lanzamiento
   const plazas = OFERTA.plazas ? `${esc(OFERTA.plazas)} plazas` : "";
 
   $("#app").innerHTML = `
@@ -292,13 +294,13 @@ function renderAngulo(){
         <p class="bloqueo" ${lead.bloqueo ? "" : "hidden"}>Nos contaste que tu mayor bloqueo es <b>“${esc(lead.bloqueo || "")}”</b>. Por eso la clase arranca por la estructura.</p>
         <ul class="facts" aria-label="Datos del workshop">
           <li><span>Workshop</span><span>${esc(OFERTA.titulo)}</span></li>
-          <li><span>Fecha</span><span>${tbd(OFERTA.fecha, "Por confirmar")}</span></li>
+          <li><span>Fecha</span><span data-fecha>Se anuncia muy pronto</span></li>
           <li><span>Duración</span><span>1 hora en vivo, con preguntas</span></li>
-          <li><span>Grabación</span><span>Incluida · acceso de por vida</span></li>
+          <li><span>Grabación</span><span>Incluida, con acceso de por vida</span></li>
           <li><span>Inversión</span><span><s class="val">${usd(OFERTA.precioRegular)}</s> ${usd(OFERTA.precio)} <span class="cop">${cop()} · precio de lanzamiento</span></span></li>
           ${plazas ? `<li><span>Cupos</span><span>${plazas}</span></li>` : ""}
         </ul>
-        <div class="cta-row">${toOffer("Reservar mi lugar")}${OFERTA.cierre ? `<span class="small">${cierre}</span>` : ""}</div>
+        <div class="cta-row">${toOffer("Reservar mi lugar")}</div>
       </div>
       <div class="photo-wrap"><div class="hero-photo" style="display:block"><img src="${A.img}" alt="Valentina Garcia" width="1100" height="1460" fetchpriority="high"></div><span class="sticker star"><b>En vivo</b><small>1 hora</small></span></div>
     </div>
@@ -370,8 +372,8 @@ function renderAngulo(){
       </ul>
       <p class="total"><span>Valor total</span><s class="val">${usd(OFERTA.precioRegular + totalBonos)}</s></p>
       <p class="price-now"><span style="font-weight:600">Hoy pagas</span><span class="price-pair"><strong>${usd(OFERTA.precio)}</strong><span class="cop">${cop()}</span></span></p>
-      <p class="urgencia">Precio de lanzamiento: <b>todo por ${usd(OFERTA.precio)}</b>, solo en esta edición. La clase queda grabada y tienes <b>acceso de por vida</b> a todo.</p>
-      <div class="pills">${plazas ? `<span>${plazas}</span>` : ""}<span>${OFERTA.fecha ? esc(OFERTA.fecha) : "1 hora en vivo"}</span><span>Acceso de por vida</span></div>
+      <p class="urgencia">Precio de lanzamiento: <b>todo por ${usd(OFERTA.precio)}</b>, solo en esta edición. La clase queda grabada: <b>acceso de por vida</b> a la grabación, la clase de tu camino y el PDF.</p>
+      <div class="pills">${plazas ? `<span>${plazas}</span>` : ""}<span>1 hora en vivo</span><span>Grabación de por vida</span></div>
       <p class="estado-msg" data-estado-msg hidden></p>
       ${buy(`Reservar mi lugar por ${usd(OFERTA.precio)}`, "block")}
       <p class="small" style="margin:14px 0 0;text-align:center"><span data-estado-texto>${cierre}</span><br>Pago seguro con Whop · Garantía de devolución si no logramos lo prometido</p>
@@ -411,7 +413,7 @@ function renderAngulo(){
     <details><summary>¿Necesito experiencia previa?</summary><p>No. El ejercicio parte de lo que ya haces o de lo que quieres empezar a hacer. Cada persona trabaja con su propio negocio o proyecto.</p></details>
     <details><summary>¿Qué recibo y cuándo?</summary><p><b>El PDF:</b> inmediatamente después de tu compra.<br><b>La clase de tu camino y el asistente de IA:</b> ${tbd(OFERTA.diasBonos, "[X]")} días después de la clase en vivo.</p></details>
     <details><summary>¿Tiene garantía?</summary><p>Sí. Si no logramos lo que te prometemos, te devolvemos tu dinero según las condiciones de garantía de Whop.</p></details>
-    ${OFERTA.cierre || OFERTA.plazas ? `<details><summary>¿Hay cupos o fecha límite?</summary><p>${OFERTA.plazas ? `Hay ${esc(OFERTA.plazas)} cupos. ` : ""}${OFERTA.cierre ? `Las inscripciones cierran el ${esc(OFERTA.cierre)}.` : ""}</p></details>` : ""}
+    ${OFERTA.plazas ? `<details><summary>¿Hay cupos?</summary><p>Hay ${esc(OFERTA.plazas)} cupos.</p></details>` : ""}
   </div></section>
 
   <section class="final wm wm-c sec-yellow curve-top" style="--curve-from:var(--bg)"><div class="wrap">
@@ -436,26 +438,26 @@ function renderAngulo(){
   io.observe($(".hero")); io.observe($("#oferta"));
 
   // Estado del lanzamiento: hasta confirmar que está "abierto" la página se comporta como "espera".
-  let estado = { estado: "espera", apertura: "2026-11-20T12:00:00-05:00", checkoutUrl: null };
+  let estado = { estado: "espera" };
   const btns = [...document.querySelectorAll("[data-buy]")], msg = $("[data-estado-msg]");
   const toast = t => { const el = $("#toast"); el.textContent = t; el.hidden = false; setTimeout(() => el.hidden = true, 4500); };
   function aplicarEstado(){
-    const fechaAp = new Date(estado.apertura).toLocaleString("es-CO", { timeZone:"America/Bogota", weekday:"long", day:"numeric", month:"long", hour:"numeric", minute:"2-digit" });
     if(estado.estado === "abierto"){
       msg.hidden = true;
+      if(estado.fechaClase) document.querySelectorAll("[data-fecha]").forEach(el => el.textContent = estado.fechaClase);
+      document.querySelectorAll("[data-estado-texto]").forEach(el => el.textContent = estado.cierreTexto ? `Inscripciones abiertas hasta ${estado.cierreTexto}` : "Inscripciones abiertas");
       btns.forEach(b => b.innerHTML = `Reservar mi lugar por ${usd(OFERTA.precio)} <span class="arrow" aria-hidden="true">→</span>`);
       return;
     }
     const cerrado = estado.estado === "cerrado";
-    const texto = cerrado ? "Inscripciones cerradas"
-      : lead.email ? `Ya estás en la lista. Las inscripciones abren el ${fechaAp}` : `Las inscripciones abren el ${fechaAp}`;
+    const texto = cerrado ? "Inscripciones cerradas" : lead.email ? "Ya estás en la lista" : "Inscripciones muy pronto";
     msg.innerHTML = cerrado ? "Las inscripciones de esta edición ya cerraron. Déjanos tus datos y te avisamos de la próxima."
-      : lead.email ? `<b>Ya estás en la lista.</b> Las inscripciones abren el <b>${fechaAp}</b> (hora Colombia). Te avisamos por WhatsApp y correo con tu link directo.`
-      : `Las inscripciones abren el <b>${fechaAp}</b> (hora Colombia). Haz el test y entra a la lista para recibir tu link directo.`;
+      : lead.email ? `<b>Ya estás en la lista.</b> Serás de las primeras en saber cuándo abren las inscripciones: te avisamos por WhatsApp y correo con tu link directo.`
+      : `Las inscripciones abren muy pronto y la lista se entera primero. Haz el test y entra para recibir tu link directo.`;
     msg.hidden = false;
     document.querySelectorAll("[data-estado-texto]").forEach(el => el.textContent = texto);
     btns.forEach(b => b.innerHTML = (cerrado || !lead.email) ? `Entrar a la lista <span class="arrow" aria-hidden="true">→</span>` : `Ya estoy en la lista ✓`);
-    $(".sticky a").textContent = "Abre el 20 de nov · " + usd(OFERTA.precio);
+    $(".sticky a").textContent = "Muy pronto · " + usd(OFERTA.precio);
   }
   aplicarEstado();
   fetch("/api/config").then(r => r.ok ? r.json() : null).then(c => { if(c){ estado = c; aplicarEstado(); } }).catch(() => {});
