@@ -274,3 +274,18 @@ s.val{color:#3a3a3a;font-weight:600;font-size:1rem;text-decoration:line-through;
 .stack s.val{font-size:1rem}
 .total s.val{font-size:1.15rem}
 .stack .star-line{font-weight:600;background:var(--accent-soft);margin:0 -10px;padding:12px 10px;border-radius:10px}
+
+/* "Quién te enseña" con más peso */
+.bio-sec{padding-bottom:88px}
+.bio-sec .quote-grid{grid-template-columns:1fr;gap:40px}
+@media(min-width:900px){.bio-sec .quote-grid{grid-template-columns:1fr 1fr;gap:56px}}
+.bio-sec .reel{max-width:640px;box-shadow:0 10px 0 var(--second),0 10px 0 2px var(--ink)}
+.bio-label{display:inline-block;font-weight:600;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;background:var(--ink);color:var(--accent);padding:6px 12px;border-radius:999px;margin:0 0 14px}
+.bio-name{font-size:clamp(2.6rem,7vw,4.4rem);line-height:1;margin-bottom:16px}
+.bio-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.bio-chips span{font-weight:600;font-size:.86rem;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:6px 14px;box-shadow:0 3px 0 var(--ink)}
+.bio-sec blockquote{font-size:clamp(1.3rem,3vw,1.7rem);font-weight:600;border-left:5px solid var(--ink);padding-left:16px;margin:0 0 18px}
+.bio-sec p{color:#2b2b2b;font-size:1.05rem}
+.bio-sec .bio-metodo li{background:#fff;border-left-color:var(--ink)}
+.urgencia{margin:4px 0 14px;font-size:.95rem;background:var(--second);border:1.5px solid var(--ink);border-radius:12px;padding:10px 14px;color:var(--ink)}
+.facts s.val{font-size:.9rem;margin-right:4px}

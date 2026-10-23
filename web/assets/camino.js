@@ -16,7 +16,8 @@ const CONFIG = {
 
 const OFERTA = {
   titulo: "De una idea a infinitos contenidos",
-  precio: 27,                 // USD
+  precio: 27,                 // USD, precio de lanzamiento (solo esta edición)
+  precioRegular: 35,          // USD, precio normal del workshop (tachado)
   precioCOP: "88.500",        // referencia en pesos colombianos (Whop cobra al cambio del día, hoy ≈ COP 88.496)
   fecha: "",                  // ej. "Jueves 5 de noviembre · 7:00 p. m. (COL)"
   cierre: "",                 // cierre de inscripciones, ej. "miércoles 4 de noviembre, 11:59 p. m."
@@ -26,7 +27,7 @@ const OFERTA = {
   diasBonos: "",              // en cuántos días se entregan la clase del camino y el asistente
   garantia: "",               // política de reembolso definida (ver FAQ)
   // Valores de referencia de los bonos (USD), tachados en la oferta. PROPUESTA: confirmar.
-  valores: { clase: 17, pdf: 9, asistente: 15 }
+  valores: { clase: 30, pdf: 5, asistente: 20 }
 };
 
 // Capturas reales de alumnas (con autorización). Mientras esté vacío, la sección no se muestra.
@@ -264,7 +265,7 @@ function renderAngulo(){
           <li><span>Workshop</span><span>${esc(OFERTA.titulo)}</span></li>
           <li><span>Fecha</span><span>${tbd(OFERTA.fecha, "Por confirmar")}</span></li>
           <li><span>Duración</span><span>1 hora en vivo, con preguntas</span></li>
-          <li><span>Inversión</span><span>${usd(OFERTA.precio)} <span class="cop">${cop()}</span></span></li>
+          <li><span>Inversión</span><span><s class="val">${usd(OFERTA.precioRegular)}</s> ${usd(OFERTA.precio)} <span class="cop">${cop()} · precio de lanzamiento</span></span></li>
           <li><span>Cupos</span><span>${plazas}</span></li>
         </ul>
         <div class="cta-row">${toOffer("Reservar mi lugar")}${OFERTA.cierre ? `<span class="small">${cierre}</span>` : ""}</div>
@@ -295,7 +296,29 @@ function renderAngulo(){
     ${toOffer("Quiero salir con mi banco de ideas")}
   </div></section>
 
-  <section class="curve-top lift" style="--curve-from:var(--second)"><div class="wrap">
+  <section class="sec-yellow curve-top bio-sec" style="--curve-from:var(--second)"><div class="wrap quote-grid">
+    <div class="reel" data-reel aria-label="Videos de Valentina García trabajando">
+      <div class="reel-grid">${CLIPS.map(c => `<video muted playsinline loop preload="none" poster="media/${c}.jpg" data-src="media/${c}.mp4" aria-hidden="true"></video>`).join("")}</div>
+      <div class="reel-solo"><video muted playsinline loop preload="none" aria-hidden="true"></video></div>
+      <span class="reel-tag">Procesos reales</span>
+    </div>
+    <div>
+      <p class="bio-label">Quién te enseña</p>
+      <h2 class="bio-name">Valentina <em>García</em></h2>
+      <div class="bio-chips"><span>Estratega digital</span><span>Creadora de DocuSelling</span><span>+18.000 en su comunidad</span></div>
+      <blockquote>“No hay un solo camino de contenido. Hay el tuyo.”</blockquote>
+      <p><b>Valentina García</b>, estratega digital y creadora de la metodología DocuSelling.</p>
+      <p>Te enseño a crear contenido perdurable documentando lo que ya haces, sin depender de la viralidad ni de la inspiración. Lidero una comunidad de más de 18.000 personas.</p>
+      <p class="bio-cierre">Aquí no vas a ver teoría, vas a ver <em>procesos reales</em>.</p>
+      <ul class="bio-metodo">
+        <li><b>Estructura 70/30:</b> 70% contenido permanente, 30% tendencias, audios y conexiones.</li>
+        <li><b>Documentar para vender:</b> su día a día es la materia prima de su contenido.</li>
+        <li><b>De una idea a infinitos contenidos:</b> cada idea se cuenta en historias, reel, carrusel, TikTok y video largo.</li>
+      </ul>
+    </div>
+  </div></section>
+
+  <section class="curve-top lift" style="--curve-from:var(--accent)"><div class="wrap">
     <p class="eyebrow">Incluido con tu lugar</p>
     <h2 class="reveal">Tres bonos, <em>uno</em> hecho para tu camino</h2>
     <div class="bonos" style="margin-top:28px">
@@ -310,13 +333,14 @@ function renderAngulo(){
       <p class="eyebrow" style="color:var(--muted)">Tu lugar en el workshop</p>
       <h2 style="font-size:1.6rem">${esc(OFERTA.titulo)}</h2>
       <ul class="stack">
-        <li><span>Workshop en vivo de 1 hora con Valen</span><span>${usd(OFERTA.precio)}</span></li>
+        <li><span>Workshop en vivo de 1 hora con Valen</span><s class="val">${usd(OFERTA.precioRegular)}</s></li>
         <li class="star-line"><span>★ ${A.bono}</span><span class="val-pair"><s class="val">${usd(V.clase)}</s><em class="incl">Incluido</em></span></li>
         <li><span>PDF “Una idea, cinco formatos”</span><span class="val-pair"><s class="val">${usd(V.pdf)}</s><em class="incl">Incluido</em></span></li>
         <li><span>Asistente de ideas con IA</span><span class="val-pair"><s class="val">${usd(V.asistente)}</s><em class="incl">Incluido</em></span></li>
       </ul>
-      <p class="total"><span>Valor total</span><s class="val">${usd(OFERTA.precio + totalBonos)}</s></p>
+      <p class="total"><span>Valor total</span><s class="val">${usd(OFERTA.precioRegular + totalBonos)}</s></p>
       <p class="price-now"><span style="font-weight:600">Hoy pagas</span><span class="price-pair"><strong>${usd(OFERTA.precio)}</strong><span class="cop">${cop()}</span></span></p>
+      <p class="urgencia">Precio de lanzamiento: <b>todo por ${usd(OFERTA.precio)}</b>, solo en esta edición.</p>
       <div class="pills"><span>${plazas}</span><span>${OFERTA.fecha ? esc(OFERTA.fecha) : "1 hora en vivo"}</span></div>
       ${buy(`Reservar mi lugar por ${usd(OFERTA.precio)}`, "block")}
       <p class="small" style="margin:14px 0 0;text-align:center">${cierre}<br>Pago seguro con Whop · Garantía de devolución si no logramos lo prometido</p>
@@ -329,27 +353,8 @@ function renderAngulo(){
     <div class="proof" style="margin-top:28px">${TESTIMONIOS.map(t => `<img src="${t.img}" alt="${esc(t.alt)}" loading="lazy">`).join("")}</div>
   </div></section>` : ""}
 
-  <section class="curve-top" style="--curve-from:var(--accent)"><div class="wrap quote-grid">
-    <div class="reel" data-reel aria-label="Videos de Valentina García trabajando">
-      <div class="reel-grid">${CLIPS.map(c => `<video muted playsinline loop preload="none" poster="media/${c}.jpg" data-src="media/${c}.mp4" aria-hidden="true"></video>`).join("")}</div>
-      <div class="reel-solo"><video muted playsinline loop preload="none" aria-hidden="true"></video></div>
-      <span class="reel-tag">Procesos reales</span>
-    </div>
-    <div>
-      <p class="eyebrow">Quién te enseña</p>
-      <blockquote>No hay un solo camino de contenido. Hay <em>el tuyo</em>.</blockquote>
-      <p><b>Valentina García</b>, estratega digital y creadora de la metodología DocuSelling.</p>
-      <p>Te enseño a crear contenido perdurable documentando lo que ya haces, sin depender de la viralidad ni de la inspiración. Lidero una comunidad de más de 18.000 personas.</p>
-      <p class="bio-cierre">Aquí no vas a ver teoría, vas a ver <em>procesos reales</em>.</p>
-      <ul class="bio-metodo">
-        <li><b>Estructura 70/30:</b> 70% contenido permanente, 30% tendencias, audios y conexiones.</li>
-        <li><b>Documentar para vender:</b> su día a día es la materia prima de su contenido.</li>
-        <li><b>De una idea a infinitos contenidos:</b> cada idea se cuenta en historias, reel, carrusel, TikTok y video largo.</li>
-      </ul>
-    </div>
-  </div></section>
 
-  <section class="sec-second curve-top" style="--curve-from:var(--bg)"><div class="wrap grid g2" style="gap:48px">
+  <section class="sec-second curve-top" style="--curve-from:var(--accent)"><div class="wrap grid g2" style="gap:48px">
     <div>
       <h2>Es para ti si…</h2>
       <ul class="nolist yeslist">
