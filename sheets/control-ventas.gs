@@ -37,29 +37,35 @@ function configurar() {
   const leads = hoja('Leads', COL_LEADS);
   const ventas = hoja('Ventas', COL_VENTAS);
 
+  // Fórmulas: el separador depende del idioma del Sheet ("," en inglés, ";" en español). Se escriben con § y se reemplaza.
+  const sep = ss.getSpreadsheetLocale().indexOf('en') === 0 ? ',' : ';';
+  const f = txt => txt.replace(/§/g, sep);
+
   // Resumen
   const r = hoja('Resumen');
   r.clear();
   const filas = [
     ['Resumen del lanzamiento', ''],
     ['Leads totales', '=COUNTA(Leads!C2:C)'],
-    ['Leads Negocio', '=COUNTIF(Leads!E2:E,"Negocio")'],
-    ['Leads Marca personal', '=COUNTIF(Leads!E2:E,"Marca personal")'],
-    ['Leads UGC', '=COUNTIF(Leads!E2:E,"UGC")'],
-    ['Indecisas (al grupo)', '=COUNTIF(Leads!F2:F,"Sí")'],
-    ['Ventas aprobadas', '=COUNTIF(Ventas!I2:I,"aprobada")'],
-    ['Ingresos aprobados', '=SUMIFS(Ventas!F2:F,Ventas!I2:I,"aprobada")'],
-    ['Reembolsos', '=COUNTIF(Ventas!I2:I,"reembolsada")'],
-    ['Conversión lead → venta', '=IFERROR(B7/B2,0)'],
+    ['Leads Negocio', '=COUNTIF(Leads!E2:E§"Negocio")'],
+    ['Leads Marca personal', '=COUNTIF(Leads!E2:E§"Marca personal")'],
+    ['Leads UGC', '=COUNTIF(Leads!E2:E§"UGC")'],
+    ['Indecisas (al grupo)', '=COUNTIF(Leads!F2:F§"Sí")'],
+    ['Ventas aprobadas', '=COUNTIF(Ventas!I2:I§"aprobada")'],
+    ['Ingresos aprobados', '=SUMIFS(Ventas!F2:F§Ventas!I2:I§"aprobada")'],
+    ['Reembolsos', '=COUNTIF(Ventas!I2:I§"reembolsada")'],
+    ['Conversión lead → venta', '=IFERROR(B7/B2§0)'],
     ['', ''],
     ['Leads y ventas por fuente y campaña', '']
   ];
-  r.getRange(1, 1, filas.length, 2).setValues(filas);
+  filas.forEach((fila, i) => {
+    r.getRange(i + 1, 1).setValue(fila[0]);
+    if (fila[1]) r.getRange(i + 1, 2).setFormula(f(fila[1]));
+  });
   r.getRange('A1').setFontWeight('bold').setFontSize(14);
   r.getRange('A12').setFontWeight('bold');
   r.getRange('B10').setNumberFormat('0.0%');
-  r.getRange('A13').setFormula(
-    '=QUERY({Leads!J2:J,Leads!L2:L,Leads!O2:O},"select Col1, Col2, count(Col1), sum(Col3) where Col1 is not null group by Col1, Col2 label Col1 \'Fuente\', Col2 \'Campaña\', count(Col1) \'Leads\', sum(Col3) \'Ventas\'",0)');
+  r.getRange('A13').setFormula(f('=IFERROR(QUERY(Leads!J1:O§"select J, L, count(J), sum(O) where J is not null group by J, L label J \'Fuente\', L \'Campaña\', count(J) \'Leads\', sum(O) \'Ventas\'"§1)§"Todavía no hay leads con UTM")'));
   r.setColumnWidth(1, 260);
 
   // Generador de links con UTM
@@ -69,8 +75,9 @@ function configurar() {
     ['https://valentinamkt.online/', 'instagram', 'reel', 'workshop-nov', 'reel-01'],
     ['https://valentinamkt.online/', 'whatsapp', 'grupo', 'workshop-nov', 'mensaje-01']
   ]);
-  u.getRange('F2').setFormula('=ARRAYFORMULA(IF(A2:A="","",A2:A&"?utm_source="&ENCODEURL(B2:B)&"&utm_medium="&ENCODEURL(C2:C)&"&utm_campaign="&ENCODEURL(D2:D)&"&utm_content="&ENCODEURL(E2:E)))');
+  u.getRange('F2').setFormula(f('=ARRAYFORMULA(IF(A2:A=""§""§A2:A&"?utm_source="&B2:B&"&utm_medium="&C2:C&"&utm_campaign="&D2:D&"&utm_content="&E2:E))'));
   u.getRange('A6').setValue('Escribe en minúscula y sin espacios (usa guiones). Una fila por publicación o mensaje; copia el link de la columna F.');
+  u.setColumnWidth(1, 220); u.setColumnWidth(6, 520);
 
   // La hoja inicial vacía se elimina si existe
   ['Hoja 1', 'Sheet1'].forEach(n => { const h = ss.getSheetByName(n); if (h && ss.getSheets().length > 1) ss.deleteSheet(h); });
