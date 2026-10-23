@@ -27,7 +27,7 @@ Regla ASYGNUZ: los agentes de IA no leen los datos de clientes. Las pruebas se h
 
 En `web/assets/camino.js`:
 
-- [ ] `CONFIG.checkoutWorkshop` → link de checkout (Whop u Hotmart)
+- [x] `CONFIG.checkoutWorkshop` → Whop `plan_nkY3ynh3G9wOr` (producto `prod_n9hWq5KyyOxNa`, oculto en la tienda, solo por link). Antes de abrir ventas: verificar el negocio en Whop para poder cobrar y retirar
 - [ ] `CONFIG.whatsappGrupo` → link del grupo de asesoría
 - [ ] `CONFIG.metaPixelId` → pixel de Meta (opcional)
 - [ ] `OFERTA.fecha`, `OFERTA.cierre`, `OFERTA.plazas`, `OFERTA.diasBonos`, `OFERTA.garantia`

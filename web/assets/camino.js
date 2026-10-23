@@ -5,7 +5,7 @@
 
 const CONFIG = {
   // === COMPLETAR ANTES DE PUBLICAR ===
-  checkoutWorkshop: "",   // link de checkout del workshop (Whop u Hotmart: confirmar plataforma)
+  checkoutWorkshop: "https://whop.com/checkout/plan_nkY3ynh3G9wOr", // Whop · producto prod_n9hWq5KyyOxNa · USD 27 pago único
   whatsappGrupo: "",      // grupo de WhatsApp donde el equipo orienta a quien no sabe su camino
   webhookUrl: "/api/lead", // función de Vercel que guarda el lead en Supabase (web/api/lead.js)
   metaPixelId: "",        // ID del pixel de Meta (opcional)
