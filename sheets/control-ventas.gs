@@ -1,6 +1,6 @@
 /**
  * Control de ventas · Valentina García (valentinamkt.online)
- * Script del Google Sheet "Valentina_Control_Ventas". Lo instala Valen en: Extensiones → Apps Script.
+ * Script del Google Sheet "Valentina_Control_Ventas". Se instala en: Extensiones → Apps Script (pegar todo, sin editar nada).
  *
  * - configurar(): crea las pestañas Resumen, Leads, Ventas y Links UTM con sus columnas y fórmulas. Correr una vez.
  * - doPost(e): recibe los eventos desde n8n (lead_nuevo, lead_indeciso, venta_aprobada, reembolso, contracargo).
@@ -8,7 +8,8 @@
  * Supabase es la base principal; esta hoja es la vista para el equipo. No editar Leads ni Ventas a mano.
  */
 
-const SECRETO = 'PEGAR_AQUI_EL_SECRETO';   // el mismo que usa n8n (llavero de JM: sheet-valen-secreto)
+// El secreto lo crea configurar() y queda en la pestaña oculta "Config" (n8n lo usa para enviar datos).
+const secreto = () => PropertiesService.getScriptProperties().getProperty('SECRETO');
 
 const UTM = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
 const COL_LEADS = ['Fecha', 'Nombre', 'Correo', 'WhatsApp', 'Camino', 'Indecisa', 'Bloqueo', 'Objetivo', 'Situación',
@@ -28,6 +29,11 @@ function configurar() {
     }
     return h;
   };
+  const props = PropertiesService.getScriptProperties();
+  if (!props.getProperty('SECRETO')) props.setProperty('SECRETO', Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, ''));
+  const cfg = hoja('Config');
+  cfg.getRange('A1:B1').setValues([['Secreto para n8n (no compartir)', props.getProperty('SECRETO')]]);
+  cfg.hideSheet();
   const leads = hoja('Leads', COL_LEADS);
   const ventas = hoja('Ventas', COL_VENTAS);
 
@@ -74,7 +80,7 @@ function configurar() {
 function doPost(e) {
   let ev;
   try { ev = JSON.parse(e.postData.contents); } catch (err) { return salida({ ok: false, error: 'json' }); }
-  if (ev.secreto !== SECRETO) return salida({ ok: false, error: 'secreto' });
+  if (!secreto() || ev.secreto !== secreto()) return salida({ ok: false, error: 'secreto' });
 
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
