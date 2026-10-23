@@ -75,3 +75,9 @@ Correr `supabase/002_leads_unicos_consentimiento.sql`: un lead por correo (se ac
 
 - Flujo: "Valen - Eventos del lanzamiento" (id `D5iFVPYWPiZ8Vo73`), activo. Recibe `lead_nuevo`, `lead_indeciso`, `venta_aprobada`, `reembolso` y `contracargo`, y arma el mensaje. El envío por WhatsApp y correo se conecta cuando estén los canales.
 - Variables en Vercel: `N8N_EVENTOS_URL` = `https://35-231-56-44.sslip.io/webhook/valen-eventos` y `N8N_EVENTOS_SECRET` (llavero de JM: `n8n-valen-eventos`). Sin ellas, los eventos quedan solo en Supabase.
+
+## 9. Embudo por UTM y panel
+
+- Correr `supabase/003_eventos_embudo_utm.sql` (tabla `eventos` y vistas `embudo_utm` y `ventas_utm`, sin datos personales).
+- La web registra: visita, test iniciado, cada pregunta, formulario, lead, clic al grupo, clic de compra y clic en espera, cada uno con sus 5 UTM.
+- Panel: `https://valentinamkt.online/panel.html`, protegido con la variable `PANEL_CLAVE` en Vercel (una clave que tú eliges).

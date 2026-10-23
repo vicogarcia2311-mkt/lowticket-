@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Panel del embudo — Valentina García</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/camino.css?v=23">
+<style>
+  .pan{max-width:1200px;margin:0 auto;padding:0 20px 64px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0 26px}
+  .kpi{background:var(--surface);border:1.5px solid var(--ink);border-radius:16px;padding:14px 16px;box-shadow:0 4px 0 var(--second)}
+  .kpi b{display:block;font-size:1.8rem;font-weight:600;line-height:1.1}
+  .kpi span{font-size:.82rem;color:var(--muted)}
+  .tabla{overflow-x:auto;border:1.5px solid var(--ink);border-radius:16px;background:#fff}
+  table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:900px}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  th{background:var(--accent);font-weight:600;position:sticky;top:0}
+  th:nth-child(-n+4),td:nth-child(-n+4){text-align:left}
+  td small{color:var(--muted);margin-left:4px}
+  tr.total td{font-weight:600;background:var(--accent-soft)}
+  .login{max-width:380px;margin:12vh auto;padding:0 20px}
+  .login input{margin:12px 0}
+  .nota{font-size:.82rem;color:var(--muted);margin-top:14px}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pct = (a, b) => b ? Math.round(a / b * 1000) / 10 + "%" : "—";
+let clave = ""; try{ clave = localStorage.getItem("vm_panel") || ""; }catch(e){}
+
+function login(msg){
+  $("#app").innerHTML = `<div class="login"><img src="img/logo-valen.png" alt="Valentina García" width="200">
+    <h1 style="font-size:1.6rem;margin-top:18px">Panel del embudo</h1>
+    <p class="small">Visitas, test, leads y ventas por cada link con UTM.</p>
+    <form id="f"><label for="c">Clave</label><input id="c" type="password" autocomplete="current-password" required>
+    <button class="btn block" type="submit">Entrar</button></form>${msg ? `<p class="msg">${esc(msg)}</p>` : ""}</div>`;
+  $("#f").addEventListener("submit", e => { e.preventDefault(); clave = $("#c").value.trim(); cargar(); });
+}
+
+async function cargar(){
+  const r = await fetch("/api/embudo", { headers: { "x-panel-clave": clave } }).catch(() => null);
+  if(!r || r.status === 401){ try{ localStorage.removeItem("vm_panel"); }catch(e){} return login(r ? "Clave incorrecta." : "Sin conexión."); }
+  if(!r.ok) return login("No se pudo leer el embudo. ¿Ya se corrió el SQL 003 en Supabase?");
+  try{ localStorage.setItem("vm_panel", clave); }catch(e){}
+  pintar(await r.json());
+}
+
+function pintar(d){
+  const t = d.filas.reduce((a, f) => { ["visitas","test_iniciado","llegaron_al_formulario","leads","clic_compra","ventas","ingresos"].forEach(k => a[k] = (a[k] || 0) + Number(f[k] || 0)); return a; }, {});
+  const fila = (f, cls) => `<tr class="${cls || ""}"><td>${esc(f.fuente)}</td><td>${esc(f.medio)}</td><td>${esc(f.campana)}</td><td>${esc(f.pieza)}</td>
+    <td>${f.visitas || 0}</td><td>${f.test_iniciado || 0}<small>${pct(f.test_iniciado, f.visitas)}</small></td>
+    <td>${f.llegaron_al_formulario || 0}</td><td>${f.leads || 0}<small>${pct(f.leads, f.visitas)}</small></td>
+    <td>${f.clic_compra || 0}</td><td>${f.ventas || 0}<small>${pct(f.ventas, f.leads)}</small></td><td>USD ${Number(f.ingresos || 0).toFixed(0)}</td></tr>`;
+  $("#app").innerHTML = `<div class="pan">
+    <div class="topbar"><span class="brand"><img src="img/logo-valen.png" alt="Valentina García" width="415" height="155"></span>
+      <span class="small">Actualizado ${new Date(d.actualizado).toLocaleString("es-CO")} · <a href="#" id="r">Actualizar</a> · <a href="#" id="s">Salir</a></span></div>
+    <h1 style="font-size:2rem">Embudo por UTM</h1>
+    <div class="kpis">
+      <div class="kpi"><b>${t.visitas || 0}</b><span>Visitas</span></div>
+      <div class="kpi"><b>${t.test_iniciado || 0}</b><span>Empezaron el test · ${pct(t.test_iniciado, t.visitas)}</span></div>
+      <div class="kpi"><b>${t.leads || 0}</b><span>Leads · ${pct(t.leads, t.visitas)} de las visitas</span></div>
+      <div class="kpi"><b>${t.ventas || 0}</b><span>Ventas · ${pct(t.ventas, t.leads)} de los leads</span></div>
+      <div class="kpi"><b>USD ${Number(t.ingresos || 0).toFixed(0)}</b><span>Ingresos aprobados</span></div>
+    </div>
+    <div class="tabla"><table>
+      <thead><tr><th>Fuente</th><th>Medio</th><th>Campaña</th><th>Pieza</th><th>Visitas</th><th>Empezaron test</th><th>Formulario</th><th>Leads</th><th>Clic compra</th><th>Ventas</th><th>Ingresos</th></tr></thead>
+      <tbody>${d.filas.map(f => fila(f)).join("") || `<tr><td colspan="11" style="text-align:center">Todavía no hay visitas registradas.</td></tr>`}
+      ${d.filas.length ? fila(Object.assign({ fuente:"Total", medio:"", campana:"", pieza:"" }, t), "total") : ""}</tbody>
+    </table></div>
+    <p class="nota">Cada visita cuenta una vez por persona y por sesión. "(directo)" = llegó sin link con UTM. El % de leads es sobre visitas; el % de ventas es sobre leads. Las ventas se atribuyen a la UTM con la que la persona hizo el test.</p>
+  </div>`;
+  $("#r").addEventListener("click", e => { e.preventDefault(); cargar(); });
+  $("#s").addEventListener("click", e => { e.preventDefault(); try{ localStorage.removeItem("vm_panel"); }catch(err){} clave = ""; login(); });
+}
+
+clave ? cargar() : login();
+</script>
+</body>
+</html>

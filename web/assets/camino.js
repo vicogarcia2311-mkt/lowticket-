@@ -95,6 +95,22 @@ if(CONFIG.metaPixelId){
 function track(name, data){ if(window.fbq) fbq('track', name, data || {}); }
 currentParams(); // guarda las UTM de llegada en sessionStorage
 
+/* ---------- embudo por UTM: visitas y pasos del test (sin datos personales) ---------- */
+const nuevoId = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+const SESION = ss("vm_sesion") || (v => (ss("vm_sesion", v), v))(nuevoId());
+const VISITANTE = ls("vm_visitante") || (v => (ls("vm_visitante", v), v))(nuevoId());
+if(!ss("vm_ref")) ss("vm_ref", document.referrer ? new URL(document.referrer).hostname : "directo");
+const pasos = new Set();
+function evento(nombre, extra){
+  if(pasos.has(nombre) && nombre !== "visita") return;   // cada paso cuenta una vez por página
+  pasos.add(nombre);
+  const body = JSON.stringify(Object.assign({ evento: nombre, sesion: SESION, visitante: VISITANTE, pagina: location.pathname,
+    angulo: document.body.dataset.angulo || null, referrer: ss("vm_ref"), movil: matchMedia("(max-width: 760px)").matches }, currentParams(), extra || {}));
+  try{ if(navigator.sendBeacon && navigator.sendBeacon("/api/evento", new Blob([body], {type:"text/plain"}))) return; }catch(e){}
+  fetch("/api/evento", { method:"POST", headers:{"Content-Type":"application/json"}, body, keepalive:true }).catch(() => {});
+}
+evento("visita");
+
 /* ---------- test ---------- */
 const PREGUNTAS = [
   { id:"objetivo", titulo:"¿Qué quieres lograr con tu contenido?", hint:"Elige la que más pese hoy.", opciones:[
@@ -135,6 +151,7 @@ function initEntrada(){
     const s = steps[current];
     s.classList.add("active");
     const h = s.querySelector("h1,h2"); if(h){ h.setAttribute("tabindex","-1"); h.focus({preventScroll:true}); }
+    if(s.querySelector("#lead-form")) evento("formulario");
     if(window.innerWidth < 960) window.scrollTo({top:0, behavior:"smooth"});
   }
   PREGUNTAS.forEach((q, qi) => {
@@ -153,12 +170,12 @@ function initEntrada(){
       const o = q.opciones[+b.dataset.oi];
       respuestas[q.id] = o.a === undefined ? o.t : o.a;
       etiquetas[q.id] = o.t;
-      if(qi === 0) send({event:"click", accion:"test_respuesta_1"});
+      evento("pregunta_" + (qi + 1));
       setTimeout(() => go(current + 1), 220);
     }));
   });
   document.querySelectorAll("[data-back]").forEach(b => b.addEventListener("click", () => go(Math.max(0, current - 1))));
-  $("[data-start]").addEventListener("click", () => { track("ViewContent", {content_name:"test_angulo"}); go(1); });
+  $("[data-start]").addEventListener("click", () => { evento("test_inicio"); track("ViewContent", {content_name:"test_angulo"}); go(1); });
 
   const form = $("#lead-form"), msg = $("#msg");
   function showMsg(t){ msg.textContent = t; msg.hidden = false; }
@@ -177,6 +194,7 @@ function initEntrada(){
     const angulo = indeciso ? "por-definir" : asignarAngulo(respuestas);
     const lead = { nombre: d.nombre.trim(), email: d.email.trim(), angulo, bloqueo: etiquetas.bloqueo || "", indeciso };
     ss("vm_lead", lead); ls("vm_lead", lead);
+    evento("lead", { angulo: angulo });
     go(indeciso ? steps.indexOf($("[data-grupo-step]")) : steps.length - 1);
     await send(Object.assign({ event:"lead", producto:"Workshop " + OFERTA.titulo,
       nombre: lead.nombre, email: lead.email, whatsapp: tel, angulo, bloqueo: lead.bloqueo, indeciso,
@@ -187,7 +205,7 @@ function initEntrada(){
   });
 
   $("[data-grupo]").addEventListener("click", e => {
-    send({event:"click", accion:"grupo_whatsapp"});
+    evento("grupo");
     if(!CONFIG.whatsappGrupo){
       e.preventDefault();
       const m = $("#msg-grupo"); m.textContent = "Modo borrador: falta el link del grupo de WhatsApp en CONFIG."; m.hidden = false;
@@ -465,13 +483,13 @@ function renderAngulo(){
   btns.forEach(b => b.addEventListener("click", e => {
     e.preventDefault();
     if(estado.estado === "abierto" && estado.checkoutUrl){
-      send({event:"click", accion:"checkout", angulo:key});
+      evento("clic_compra");
       track("InitiateCheckout", {content_category:key, value:OFERTA.precio, currency:"USD"});
       const url = new URL(checkoutUrl(estado.checkoutUrl, key));
       if(lead.email) url.searchParams.set("email", lead.email);
       location.href = url.toString();
     } else if(lead.email && estado.estado !== "cerrado"){
-      send({event:"click", accion:"clic_espera", angulo:key});
+      evento("clic_espera");
       toast("Ya estás en la lista. Te avisamos el día de la apertura.");
     } else {
       location.href = "camino.html" + location.search;
