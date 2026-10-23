@@ -66,3 +66,8 @@ Antes de la apertura: reactivar el plan en Whop (hoy archivado para que nadie co
 
 ## 7. Supabase: 002
 Correr `supabase/002_leads_unicos_consentimiento.sql`: un lead por correo (se actualiza si repite el test) y evidencia del consentimiento (fecha y versión de la política). Mientras no se corra, los leads se siguen guardando como filas nuevas.
+
+## 8. n8n (instancia de ASYGNUZ)
+
+- Flujo: "Valen - Eventos del lanzamiento" (id `D5iFVPYWPiZ8Vo73`), activo. Recibe `lead_nuevo`, `lead_indeciso`, `venta_aprobada`, `reembolso` y `contracargo`, y arma el mensaje. El envío por WhatsApp y correo se conecta cuando estén los canales.
+- Variables en Vercel: `N8N_EVENTOS_URL` = `https://35-231-56-44.sslip.io/webhook/valen-eventos` y `N8N_EVENTOS_SECRET` (llavero de JM: `n8n-valen-eventos`). Sin ellas, los eventos quedan solo en Supabase.

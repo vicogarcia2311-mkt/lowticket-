@@ -5,6 +5,7 @@
 
 const crypto = require("crypto");
 const { configured, rest } = require("./_supabase");
+const { avisar } = require("./_n8n");
 
 const TOLERANCIA_S = 5 * 60;
 
@@ -82,10 +83,14 @@ module.exports = async (req, res) => {
           raw: evento
         }
       });
+      await avisar("venta_aprobada", { pago_id: d.id, email, monto: d.total, moneda: d.currency, angulo: lead ? lead.angulo : null,
+        nombre: d.user && d.user.name, producto: d.product && d.product.title });
     } else if (evento.type === "refund.created") {
       await marcar((d.payment && d.payment.id) || d.payment_id, "reembolsada");
+      await avisar("reembolso", { pago_id: (d.payment && d.payment.id) || d.payment_id });
     } else if (evento.type === "dispute.created") {
       await marcar((d.payment && d.payment.id) || d.payment_id, "contracargo");
+      await avisar("contracargo", { pago_id: (d.payment && d.payment.id) || d.payment_id });
     }
     // Otros eventos se aceptan y se ignoran para que Whop no los reintente.
     return res.status(200).json({ ok: true });

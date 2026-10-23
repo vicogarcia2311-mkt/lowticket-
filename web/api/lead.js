@@ -3,6 +3,7 @@
 // Variables de entorno en Vercel: SUPABASE_URL y SUPABASE_SECRET_KEY (nunca en el código).
 
 const { configured, rest } = require("./_supabase");
+const { avisar } = require("./_n8n");
 
 const ANGULOS = ["ugc", "negocio", "marca-personal", "por-definir"];
 const UTM = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
@@ -46,12 +47,20 @@ module.exports = async (req, res) => {
 
   try {
     await rest("leads?on_conflict=email", { method: "POST", body: completo, prefer: "resolution=merge-duplicates,return=minimal" });
+    await avisar(lead.indeciso ? "lead_indeciso" : "lead_nuevo", {
+      nombre: lead.nombre, email, whatsapp: lead.whatsapp, angulo: lead.angulo, bloqueo: lead.bloqueo,
+      objetivo: lead.objetivo, situacion: lead.situacion, utm_source: lead.utm_source, utm_campaign: lead.utm_campaign
+    });
     return res.status(201).end();
   } catch (e) {
     // Si aún no se corrió el SQL 002 (sin índice único ni columnas nuevas), se guarda igual como fila nueva.
     console.error("lead upsert", e.message);
     try {
       await rest("leads", { method: "POST", body: lead, prefer: "return=minimal" });
+      await avisar(lead.indeciso ? "lead_indeciso" : "lead_nuevo", {
+        nombre: lead.nombre, email, whatsapp: lead.whatsapp, angulo: lead.angulo, bloqueo: lead.bloqueo,
+        objetivo: lead.objetivo, situacion: lead.situacion, utm_source: lead.utm_source, utm_campaign: lead.utm_campaign
+      });
       return res.status(201).end();
     } catch (e2) {
       console.error("lead insert", e2.message);
