@@ -17,9 +17,8 @@ const CONFIG = {
 
 const OFERTA = {
   titulo: "De una idea a infinitos contenidos",
-  precio: 27,                 // USD, precio de lanzamiento (solo esta edición)
-  precioRegular: 35,          // USD, precio normal del workshop (tachado)
-  precioCOP: "88.500",        // referencia en pesos colombianos (Whop cobra al cambio del día, hoy ≈ COP 88.496)
+  // Precio reservado (campaña de expectativa): no va aquí. Lo entrega /api/config solo con el carrito abierto
+  // (variables PRECIO_USD, PRECIO_REGULAR_USD y PRECIO_COP en Vercel).
   // Fechas reservadas (campaña de expectativa): no van aquí. Las entrega /api/config solo con el carrito abierto.
   plataforma: "YouTube",      // dónde se transmite la clase en vivo
   plazas: "",                 // ej. "150"; si queda vacío dice "Plazas limitadas"
@@ -27,7 +26,7 @@ const OFERTA = {
   diasBonos: "",              // en cuántos días se entregan la clase del camino y el asistente
   garantia: "",               // política de reembolso definida (ver FAQ)
   // Valores de referencia de los bonos (USD), tachados en la oferta. PROPUESTA: confirmar.
-  valores: { clase: 30, pdf: 5, asistente: 20 }
+  valores: { clase: 40, pdf: 10, asistente: 30 }   // valor de referencia de cada bono (se muestra tachado)
 };
 
 // Capturas reales de alumnas (con autorización). Mientras esté vacío, la sección no se muestra.
@@ -39,7 +38,7 @@ const $ = (s, el) => (el || document).querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const tbd = (v, ph) => v ? esc(v) : `<mark class="tbd">${ph}</mark>`;
 const usd = n => `USD ${n}`;
-const cop = () => OFERTA.precioCOP ? `≈ $${OFERTA.precioCOP} COP` : "";
+
 function ls(k, v){ try{ if(v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); }catch(e){ return null; } }
 function ss(k, v){ try{ if(v === undefined) return JSON.parse(sessionStorage.getItem(k) || "null"); sessionStorage.setItem(k, JSON.stringify(v)); }catch(e){ return null; } }
 document.querySelectorAll("[data-ws-title]").forEach(el => el.textContent = OFERTA.titulo);
@@ -315,7 +314,7 @@ function renderAngulo(){
           <li><span>Fecha</span><span data-fecha>Se anuncia muy pronto</span></li>
           <li><span>Duración</span><span>1 hora en vivo, con preguntas</span></li>
           <li><span>Grabación</span><span>Incluida, con acceso de por vida</span></li>
-          <li><span>Inversión</span><span><s class="val">${usd(OFERTA.precioRegular)}</s> ${usd(OFERTA.precio)} <span class="cop">${cop()} · precio de lanzamiento</span></span></li>
+          <li><span>Inversión</span><span data-precio-dato>Se revela muy pronto</span></li>
           ${plazas ? `<li><span>Cupos</span><span>${plazas}</span></li>` : ""}
         </ul>
         <div class="cta-row">${toOffer("Reservar mi lugar")}</div>
@@ -383,17 +382,21 @@ function renderAngulo(){
       <p class="eyebrow" style="color:var(--muted)">Tu lugar en el workshop</p>
       <h2 style="font-size:1.6rem">${esc(OFERTA.titulo)}</h2>
       <ul class="stack">
-        <li><span>Workshop en vivo de 1 hora con Valen <small class="stack-note">+ grabación con acceso de por vida</small></span><s class="val">${usd(OFERTA.precioRegular)}</s></li>
+        <li><span>Workshop en vivo de 1 hora con Valen <small class="stack-note">+ grabación con acceso de por vida</small></span><span data-precio-regular class="por-revelar">Por revelar</span></li>
         <li class="star-line"><span>★ ${A.bono}</span><span class="val-pair"><s class="val">${usd(V.clase)}</s><em class="incl">Incluido</em></span></li>
         <li><span>PDF “Una idea, cinco formatos”</span><span class="val-pair"><s class="val">${usd(V.pdf)}</s><em class="incl">Incluido</em></span></li>
         <li><span>Asistente de ideas con IA</span><span class="val-pair"><s class="val">${usd(V.asistente)}</s><em class="incl">Incluido</em></span></li>
       </ul>
-      <p class="total"><span>Valor total</span><s class="val">${usd(OFERTA.precioRegular + totalBonos)}</s></p>
-      <p class="price-now"><span style="font-weight:600">Hoy pagas</span><span class="price-pair"><strong>${usd(OFERTA.precio)}</strong><span class="cop">${cop()}</span></span></p>
-      <p class="urgencia">Precio de lanzamiento: <b>todo por ${usd(OFERTA.precio)}</b>, solo en esta edición. La clase queda grabada: <b>acceso de por vida</b> a la grabación, la clase de tu camino y el PDF.</p>
+      <p class="total"><span data-total-label>Valor de los bonos</span><s class="val" data-total>${usd(totalBonos)}</s></p>
+      <div data-precio-bloque>
+        <div class="expectativa">
+          <p class="exp-tit">Pronto te <em>regalamos</em> todo esto</p>
+          <p>Los tres bonos llegan de regalo con tu lugar en el workshop. El precio de lanzamiento se revela primero a quienes están en la lista, antes que a nadie.</p>
+        </div>
+      </div>
       <div class="pills">${plazas ? `<span>${plazas}</span>` : ""}<span>1 hora en vivo</span><span>Grabación de por vida</span></div>
       <p class="estado-msg" data-estado-msg hidden></p>
-      ${buy(`Reservar mi lugar por ${usd(OFERTA.precio)}`, "block")}
+      ${buy("Reservar mi lugar", "block")}
       <p class="small" style="margin:14px 0 0;text-align:center"><span data-estado-texto>${cierre}</span><br>Pago seguro con Whop · Garantía de devolución si no logramos lo prometido</p>
     </div>
   </div></section>
@@ -438,13 +441,13 @@ function renderAngulo(){
     <p class="eyebrow">${esc(OFERTA.titulo)}</p>
     <h2>Una hora para salir con tu <em>banco de ideas</em></h2>
     <p class="lead" style="margin:0 auto 28px">Tu estructura, tu camino ${A.nombre.toLowerCase()} y tus primeras ideas, armadas en vivo con Valen.</p>
-    ${buy(`Reservar mi lugar por ${usd(OFERTA.precio)}`)}
+    ${buy("Reservar mi lugar")}
     <p class="small" style="margin-top:16px" data-estado-texto>${cierre}${plazas ? " · " + plazas : ""}</p>
     <div class="others" aria-label="Otros caminos"><span class="small" style="align-self:center">¿No te identificas?</span>${otros.map(k => `<a href="${CONFIG.paginas[k]}">Ver el camino ${ANGULOS[k].nombre}</a>`).join("")}</div>
   </div></section>
 
   <footer><div class="wrap">© Valentina García · <a href="/privacidad">Política de tratamiento de datos</a></div></footer>
-  <div class="sticky"><a class="btn block" href="#oferta">Reservar mi lugar · ${usd(OFERTA.precio)}</a></div>
+  <div class="sticky"><a class="btn block" href="#oferta">Ver lo que incluye</a></div>
   <p class="msg ok toast" id="toast" role="status" hidden></p>`;
 
   // barra fija en móvil: aparece después del inicio y se oculta mientras la oferta está en pantalla
@@ -464,7 +467,17 @@ function renderAngulo(){
       msg.hidden = true;
       if(estado.fechaClase) document.querySelectorAll("[data-fecha]").forEach(el => el.textContent = estado.fechaClase);
       document.querySelectorAll("[data-estado-texto]").forEach(el => el.textContent = estado.cierreTexto ? `Inscripciones abiertas hasta ${estado.cierreTexto}` : "Inscripciones abiertas");
-      btns.forEach(b => b.innerHTML = `Reservar mi lugar por ${usd(OFERTA.precio)} <span class="arrow" aria-hidden="true">→</span>`);
+      const P = estado.precio, R = estado.precioRegular;
+      if(P){
+        const copTxt = estado.precioCOP ? `≈ $${esc(estado.precioCOP)} COP` : "";
+        document.querySelectorAll("[data-precio-dato]").forEach(el => el.innerHTML = `${R ? `<s class="val">${usd(R)}</s> ` : ""}${usd(P)} <span class="cop">${copTxt} · precio de lanzamiento</span>`);
+        document.querySelectorAll("[data-precio-regular]").forEach(el => el.outerHTML = R ? `<s class="val">${usd(R)}</s>` : "");
+        if(R){ $("[data-total-label]").textContent = "Valor total"; $("[data-total]").textContent = usd(R + totalBonos); }
+        $("[data-precio-bloque]").innerHTML = `<p class="price-now"><span style="font-weight:600">Hoy pagas</span><span class="price-pair"><strong>${usd(P)}</strong><span class="cop">${copTxt}</span></span></p>
+          <p class="urgencia">Precio de lanzamiento: <b>todo por ${usd(P)}</b>, solo en esta edición. La clase queda grabada: <b>acceso de por vida</b> a la grabación, la clase de tu camino y el PDF.</p>`;
+        $(".sticky a").textContent = "Reservar mi lugar · " + usd(P);
+      }
+      btns.forEach(b => b.innerHTML = `Reservar mi lugar${P ? " por " + usd(P) : ""} <span class="arrow" aria-hidden="true">→</span>`);
       return;
     }
     const cerrado = estado.estado === "cerrado";
@@ -475,7 +488,7 @@ function renderAngulo(){
     msg.hidden = false;
     document.querySelectorAll("[data-estado-texto]").forEach(el => el.textContent = texto);
     btns.forEach(b => b.innerHTML = (cerrado || !lead.email) ? `Entrar a la lista <span class="arrow" aria-hidden="true">→</span>` : `Ya estoy en la lista ✓`);
-    $(".sticky a").textContent = "Muy pronto · " + usd(OFERTA.precio);
+    $(".sticky a").textContent = "Ver lo que incluye";
   }
   aplicarEstado();
   fetch("/api/config").then(r => r.ok ? r.json() : null).then(c => { if(c){ estado = c; aplicarEstado(); } }).catch(() => {});
@@ -484,7 +497,7 @@ function renderAngulo(){
     e.preventDefault();
     if(estado.estado === "abierto" && estado.checkoutUrl){
       evento("clic_compra");
-      track("InitiateCheckout", {content_category:key, value:OFERTA.precio, currency:"USD"});
+      track("InitiateCheckout", {content_category:key, value:estado.precio || 0, currency:"USD"});
       const url = new URL(checkoutUrl(estado.checkoutUrl, key));
       if(lead.email) url.searchParams.set("email", lead.email);
       location.href = url.toString();

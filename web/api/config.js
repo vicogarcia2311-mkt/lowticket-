@@ -6,6 +6,7 @@
 //   CHECKOUT_URL        link de pago de Whop (plan activo).
 //   FECHA_CLASE_TEXTO   texto que se muestra con el carrito abierto, ej. "Sábado 00 de mes · 7:00 p. m. (COL)".
 //   CIERRE_TEXTO        texto del cierre de inscripciones, ej. "el sábado 00 de mes, al empezar la clase".
+//   PRECIO_USD, PRECIO_REGULAR_USD, PRECIO_COP  precio de lanzamiento, precio regular tachado y referencia en pesos (reservados hasta abrir).
 //   ESTADO_LANZAMIENTO  opcional: espera | abierto | cerrado (fuerza el estado a mano).
 
 module.exports = (req, res) => {
@@ -27,6 +28,9 @@ module.exports = (req, res) => {
     out.checkoutUrl = process.env.CHECKOUT_URL;
     out.fechaClase = process.env.FECHA_CLASE_TEXTO || null;
     out.cierreTexto = process.env.CIERRE_TEXTO || null;
+    out.precio = Number(process.env.PRECIO_USD) || null;
+    out.precioRegular = Number(process.env.PRECIO_REGULAR_USD) || null; // se muestra tachado
+    out.precioCOP = process.env.PRECIO_COP || null;
   }
   res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=60");
   res.status(200).json(out);

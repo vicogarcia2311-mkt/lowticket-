@@ -311,3 +311,8 @@ footer a{color:inherit}
 .total{align-items:center;color:var(--ink);font-weight:600;font-size:1.05rem}
 .total s.val{font-size:1.6rem;font-weight:700;color:var(--ink);text-decoration-thickness:3px;text-decoration-color:#E5484D}
 .stack s.val{color:#222;text-decoration-color:#E5484D}
+/* Expectativa: sin precio hasta abrir el carrito */
+.por-revelar{align-self:center;display:inline-block;height:auto;font-weight:600;font-size:.86rem;background:var(--second);border:1.5px dashed var(--ink);border-radius:999px;padding:2px 10px;white-space:nowrap}
+.expectativa{background:var(--accent-soft);border:2px solid var(--ink);border-radius:16px;padding:16px 18px;margin:8px 0 16px;box-shadow:0 4px 0 var(--second)}
+.expectativa .exp-tit{font-weight:600;font-size:1.25rem;margin:0 0 6px;color:var(--ink)}
+.expectativa p{margin:0;color:#2b2b2b}

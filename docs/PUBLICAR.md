@@ -32,7 +32,7 @@ En `web/assets/camino.js`:
 - [ ] `CONFIG.whatsappGrupo` → link del grupo de asesoría
 - [ ] `CONFIG.metaPixelId` → pixel de Meta (opcional)
 - [ ] `OFERTA.fecha`, `OFERTA.cierre`, `OFERTA.plazas`, `OFERTA.diasBonos`, `OFERTA.garantia`
-- [ ] Confirmar `OFERTA.valores` de los bonos (propuesta: 17 / 9 / 15)
+- [x] `OFERTA.valores` de los bonos: 40 / 10 / 30 (se muestran tachados)
 - [ ] `TESTIMONIOS` → capturas reales con autorización (si queda vacío, la sección no aparece)
 
 En las páginas:
@@ -53,7 +53,7 @@ En las páginas:
 
 Las fechas son reservadas (campaña de expectativa): viven en el vault y en las variables de Vercel, nunca en esta repo pública.
 
-`/api/config` decide el estado: `espera` antes de la apertura, `abierto` después, `cerrado` desde `CIERRE_ISO`. En espera la página muestra el precio y "Ya estás en la lista", sin fechas ni botón de compra.
+`/api/config` decide el estado: `espera` antes de la apertura, `abierto` después, `cerrado` desde `CIERRE_ISO`. En espera la página muestra los bonos con su valor tachado y el mensaje "Pronto te regalamos todo esto", sin precio del workshop, sin fechas y sin botón de compra.
 
 Variables en Vercel:
 
@@ -64,6 +64,9 @@ Variables en Vercel:
 | `FECHA_CLASE_TEXTO` | fecha de la clase en texto; solo se muestra con el carrito abierto |
 | `CIERRE_TEXTO` | texto del cierre de inscripciones; solo se muestra con el carrito abierto |
 | `CHECKOUT_URL` | link de pago de Whop del plan activo |
+| `PRECIO_USD` | precio de lanzamiento (número). Reservado: solo se muestra con el carrito abierto |
+| `PRECIO_REGULAR_USD` | precio regular, se muestra tachado al abrir |
+| `PRECIO_COP` | referencia en pesos, texto (ej. con puntos de miles) |
 | `ESTADO_LANZAMIENTO` | opcional, fuerza `espera`, `abierto` o `cerrado` |
 
 Antes de la apertura: reactivar el plan en Whop (hoy archivado para que nadie compre antes) o crear uno nuevo, y poner su link en `CHECKOUT_URL`. Sin `CHECKOUT_URL` la página sigue en espera aunque llegue la fecha.

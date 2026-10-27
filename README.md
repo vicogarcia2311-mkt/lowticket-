@@ -1,6 +1,6 @@
 # Valentina García · Web del workshop
 
-Workshop **"De una idea a infinitos contenidos"** (en vivo, 1 hora, USD 27).
+Workshop **"De una idea a infinitos contenidos"** (en vivo, 1 hora). El precio es reservado hasta la apertura (variables de Vercel).
 Test de 3 preguntas → página del camino (Negocio, Marca personal o UGC) → compra.
 Quien responde "No estoy segura" termina en el grupo de WhatsApp de asesoría.
 
