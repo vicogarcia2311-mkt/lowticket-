@@ -6,6 +6,8 @@ const { configured, rest } = require("./_supabase");
 const { avisar } = require("./_n8n");
 
 const ANGULOS = ["ugc", "negocio", "marca-personal", "por-definir"];
+// Infoproductos gratis que piden solo nombre y correo. Cada lead queda marcado con sus productos (requiere supabase/005_productos.sql).
+const PRODUCTOS_GRATIS = ["prompts"];
 const UTM = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
 const txt = (v, max) => (typeof v === "string" ? v.trim().slice(0, max) : null) || null;
 
@@ -20,6 +22,7 @@ module.exports = async (req, res) => {
   if (data.event !== "lead") return res.status(204).end();
 
   const email = (txt(data.email, 200) || "").toLowerCase();
+  if (PRODUCTOS_GRATIS.includes(data.producto)) return productoGratis(data, email, res);
   const lead = {
     nombre: txt(data.nombre, 120),
     email,
@@ -47,6 +50,8 @@ module.exports = async (req, res) => {
 
   try {
     await rest("leads?on_conflict=email", { method: "POST", body: completo, prefer: "resolution=merge-duplicates,return=minimal" });
+    await rest("rpc/lead_producto", { method: "POST", body: { p: { nombre: lead.nombre, email, angulo: lead.angulo, producto: "workshop" } } })
+      .catch(e => console.error("lead producto", e.message)); // sin el SQL 005 el lead queda guardado igual
     await avisar(lead.indeciso ? "lead_indeciso" : "lead_nuevo", {
       nombre: lead.nombre, email, whatsapp: lead.whatsapp, angulo: lead.angulo, bloqueo: lead.bloqueo,
       objetivo: lead.objetivo, situacion: lead.situacion,
@@ -70,3 +75,24 @@ module.exports = async (req, res) => {
     }
   }
 };
+
+// Lead de un producto gratis (ej. /prompts): nombre, correo y camino. No pisa los datos si la persona ya estaba en la lista.
+async function productoGratis(data, email, res) {
+  const nombre = txt(data.nombre, 120);
+  if (!nombre || !/^\S+@\S+\.\S+$/.test(email) || !ANGULOS.includes(data.angulo) || data.consentimiento !== true) return res.status(422).end();
+  if (!configured()) return res.status(503).end();
+  const p = {
+    nombre, email, angulo: data.angulo, producto: data.producto, pagina: txt(data.page, 200),
+    consentimiento_at: txt(data.consentimiento_at, 40) || new Date().toISOString(), politica_version: txt(data.politica_version, 40)
+  };
+  UTM.forEach(k => { p[k] = txt(data[k], 200); });
+  try {
+    await rest("rpc/lead_producto", { method: "POST", body: { p } });
+  } catch (e) {
+    console.error("lead producto gratis", e.message);
+    return res.status(502).end();
+  }
+  await avisar("lead_" + data.producto, { nombre, email, angulo: data.angulo, producto: data.producto,
+    utm_source: p.utm_source, utm_medium: p.utm_medium, utm_campaign: p.utm_campaign, utm_content: p.utm_content, utm_term: p.utm_term });
+  return res.status(201).end();
+}

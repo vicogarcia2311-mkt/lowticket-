@@ -86,3 +86,10 @@ Correr `supabase/002_leads_unicos_consentimiento.sql`: un lead por correo (se ac
 - Correr también `supabase/004_panel.sql` (función `panel_datos` con filtro de fechas).
 - Panel: `https://valentinamkt.online/panel`, protegido con `PANEL_CLAVE` en Vercel. Tiene datos personales (nombres, correos, WhatsApp): la clave solo para JM, Valen y Karen.
 - Pestañas: Resumen (indicadores, gráfico por día, por camino, top piezas), Embudo por UTM, Leads (filtros, botón de WhatsApp, CSV) y Ventas.
+
+## 10. Varios infoproductos en la misma web
+
+- Cada infoproducto vive en su ruta (`/camino` = workshop, `/prompts` = prompts 7-7-5). Los leads son los mismos: un correo, una fila, con la lista `productos`.
+- Correr `supabase/005_productos.sql`: WhatsApp opcional (los productos gratis piden solo nombre y correo), columna `productos` y función `lead_producto`, que suma el producto sin pisar los datos de quien ya estaba en la lista.
+- Panel: columna y filtro de producto en Leads, y tabla "Por producto" en Resumen (cuántos compraron el workshop después).
+- n8n: el evento `lead_prompts` arma el correo con el link a los prompts; el envío se conecta con el proveedor de correo.

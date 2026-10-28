@@ -53,11 +53,13 @@ const $ = (s, el) => (el || document).querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const pct = (a, b) => b ? Math.round(a / b * 1000) / 10 + "%" : "—";
 const usd = n => "USD " + Number(n || 0).toLocaleString("es-CO", { maximumFractionDigits: 0 });
+const PRODUCTOS = { "workshop": "Workshop (test)", "prompts": "Prompts 7-7-5" };
+const prods = l => (l.productos && l.productos.length ? l.productos : ["workshop"]);
 const CAMINOS = { "negocio": "Negocio", "marca-personal": "Marca personal", "ugc": "UGC", "por-definir": "Por definir" };
 const fechaCorta = iso => new Date(iso).toLocaleString("es-CO", { timeZone: "America/Bogota", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 let clave = ""; try{ clave = localStorage.getItem("vm_panel") || ""; }catch(e){}
 let D = null, pestana = "resumen", rango = "todo";
-const filtro = { texto: "", camino: "", estado: "" };
+const filtro = { texto: "", camino: "", estado: "", producto: "" };
 
 function login(msg){
   $("#app").innerHTML = `<div class="login"><img src="img/logo-valen.png" alt="Valentina García" width="200">
@@ -139,6 +141,11 @@ function vResumen(){
       <tbody>${cam.map(c => `<tr><td>${esc(CAMINOS[c.camino] || c.camino)}</td><td class="n">${c.leads}</td><td class="n">${c.ventas}</td><td class="n">${pct(c.ventas, c.leads)}</td><td class="n">${usd(c.ingresos)}</td></tr>`).join("") || `<tr><td colspan="5">Sin leads todavía.</td></tr>`}</tbody>
     </table></div></div>
   </div>
+  <div class="caja"><h2>Por producto</h2><div class="tabla"><table>
+    <thead><tr><th>Producto</th><th class="n">Leads</th><th class="n">Compraron el workshop</th><th class="n">Conversión</th></tr></thead>
+    <tbody>${Object.entries(PRODUCTOS).map(([k, n]) => { const ls = D.leads.filter(l => prods(l).includes(k)), c = ls.filter(l => l.compro).length;
+      return `<tr><td>${esc(n)}</td><td class="n">${ls.length}</td><td class="n">${c}</td><td class="n">${pct(c, ls.length)}</td></tr>`; }).join("")}</tbody>
+  </table></div></div>
   <div class="caja"><h2>Las 5 piezas que más leads traen</h2>${tablaEmbudo([...D.embudo].sort((a, b) => (b.leads || 0) - (a.leads || 0)).slice(0, 5), false)}</div>`;
 }
 
@@ -165,6 +172,7 @@ function leadsFiltrados(){
   const tx = filtro.texto.toLowerCase();
   return D.leads.filter(l =>
     (!filtro.camino || l.angulo === filtro.camino) &&
+    (!filtro.producto || prods(l).includes(filtro.producto)) &&
     (!filtro.estado || (filtro.estado === "indecisas" && l.indeciso) || (filtro.estado === "compraron" && l.compro) || (filtro.estado === "sin_compra" && !l.compro)) &&
     (!tx || [l.nombre, l.email, l.whatsapp, l.utm_content, l.utm_campaign].join(" ").toLowerCase().includes(tx)));
 }
@@ -174,6 +182,7 @@ function vLeads(){
     <div class="filtros">
       <input class="buscar" id="tx" placeholder="Buscar nombre, correo, WhatsApp o pieza" value="${esc(filtro.texto)}" style="min-width:260px">
       <select id="fc"><option value="">Todos los caminos</option>${Object.entries(CAMINOS).map(([k, n]) => `<option value="${k}"${filtro.camino === k ? " selected" : ""}>${n}</option>`).join("")}</select>
+      <select id="fp"><option value="">Todos los productos</option>${Object.entries(PRODUCTOS).map(([k, n]) => `<option value="${k}"${filtro.producto === k ? " selected" : ""}>${n}</option>`).join("")}</select>
       <select id="fe">${[["","Todos"],["indecisas","Indecisas"],["compraron","Compraron"],["sin_compra","Sin compra"]].map(([k, n]) => `<option value="${k}"${filtro.estado === k ? " selected" : ""}>${n}</option>`).join("")}</select>
       <button class="chip" id="csv">Descargar CSV</button>
     </div>
@@ -181,19 +190,21 @@ function vLeads(){
     <p class="nota">Máximo 1.000 leads por consulta; usa el rango de fechas si hay más.</p></div>`;
   const pintarTabla = () => {
     const ls = leadsFiltrados();
-    $("#tl").innerHTML = `<table><thead><tr><th>Fecha</th><th>Nombre</th><th>WhatsApp</th><th>Correo</th><th>Camino</th><th>Estado</th><th>Bloqueo</th><th>Fuente</th><th>Pieza</th></tr></thead>
+    $("#tl").innerHTML = `<table><thead><tr><th>Fecha</th><th>Nombre</th><th>WhatsApp</th><th>Correo</th><th>Camino</th><th>Producto</th><th>Estado</th><th>Bloqueo</th><th>Fuente</th><th>Pieza</th></tr></thead>
       <tbody>${ls.map(l => `<tr><td>${fechaCorta(l.created_at)}</td><td>${esc(l.nombre)}</td>
         <td>${waLink(l) ? `<a class="wa" href="${waLink(l)}" target="_blank" rel="noopener">${esc(l.whatsapp)} · Escribir</a>` : ""}</td>
         <td>${esc(l.email)}</td><td>${esc(CAMINOS[l.angulo] || l.angulo)}</td>
+        <td>${prods(l).map(p => `<span class="tag">${esc(PRODUCTOS[p] || p)}</span>`).join(" ")}</td>
         <td>${l.compro ? `<span class="tag t-ok">Compró</span>` : l.indeciso ? `<span class="tag t-si">Indecisa</span>` : `<span class="tag">En lista</span>`}</td>
-        <td>${esc(l.bloqueo)}</td><td>${esc(l.utm_source || "(directo)")}</td><td>${esc(l.utm_content)}</td></tr>`).join("") || `<tr><td colspan="9">No hay leads con estos filtros.</td></tr>`}</tbody></table>`;
+        <td>${esc(l.bloqueo)}</td><td>${esc(l.utm_source || "(directo)")}</td><td>${esc(l.utm_content)}</td></tr>`).join("") || `<tr><td colspan="10">No hay leads con estos filtros.</td></tr>`}</tbody></table>`;
   };
   pintarTabla();
   $("#tx").addEventListener("input", e => { filtro.texto = e.target.value; pintarTabla(); });
   $("#fc").addEventListener("change", e => { filtro.camino = e.target.value; pintarTabla(); });
+  $("#fp").addEventListener("change", e => { filtro.producto = e.target.value; pintarTabla(); });
   $("#fe").addEventListener("change", e => { filtro.estado = e.target.value; pintarTabla(); });
   $("#csv").addEventListener("click", () => {
-    const cols = ["created_at","nombre","email","whatsapp","angulo","indeciso","compro","bloqueo","objetivo","situacion","utm_source","utm_medium","utm_campaign","utm_content"];
+    const cols = ["created_at","nombre","email","whatsapp","angulo","productos","indeciso","compro","bloqueo","objetivo","situacion","utm_source","utm_medium","utm_campaign","utm_content"];
     const csv = [cols.join(",")].concat(leadsFiltrados().map(l => cols.map(c => `"${String(l[c] ?? "").replace(/"/g, '""')}"`).join(","))).join("\n");
     const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv" })); a.download = "leads-valentina.csv"; a.click();
   });

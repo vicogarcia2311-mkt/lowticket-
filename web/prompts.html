@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prompts 7-7-5 — Valentina Garcia</title>
+<meta name="description" content="Tres prompts DocuSelling con la fórmula 7-7-5: pon tu idea y sale un guion listo para grabar.">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="Prompts 7-7-5 · Valentina Garcia">
+<meta property="og:description" content="Convierte tu colapso en tu mejor contenido. Un guion listo para grabar en un minuto.">
+<meta property="og:image" content="img/valen-hero.jpg">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/camino.css?v=25">
+<style>
+  .formula{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0 22px}
+  .formula div{background:var(--second,#E6DEFF);border-radius:14px;padding:12px 10px;text-align:center}
+  .formula b{display:block;font-size:1.6rem;line-height:1}
+  .formula span{font-size:.8rem}
+  .tabs-p{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+  .tabs-p .opt{width:auto;padding:8px 14px}
+  .prompt-box{background:#FFF393;border-radius:16px;padding:16px;max-height:52vh;overflow:auto;margin:0 0 14px}
+  .prompt-box pre{margin:0;white-space:pre-wrap;word-break:break-word;font:400 .86rem/1.55 Poppins,sans-serif}
+  .pasos-uso{margin:10px 0 0;padding-left:1.2em;font-size:.92rem}
+  .pasos-uso li{margin:4px 0}
+</style>
+</head>
+<body data-page="prompts">
+<div class="draft-banner" role="note">Borrador: revisar textos con Valen antes de compartir el link.</div>
+
+<main class="entrada">
+  <div class="entrada-grid">
+    <div class="photo-panel">
+      <img src="img/valen-hero.jpg" alt="Valentina Garcia" width="1100" height="1460" fetchpriority="high">
+      <span class="photo-tag">Valentina Garcia · creadora de DocuSelling</span>
+      <span class="sticker star"><b>Gratis</b><small>3 prompts</small></span>
+    </div>
+
+    <div class="panel wm wm-br">
+      <div class="topbar"><span class="brand"><img src="img/logo-valen.png" alt="Valentina García · Empresaria digital" width="415" height="155"></span><span class="small">Fórmula 7-7-5</span></div>
+
+      <!-- 0 · intro -->
+      <div class="step active">
+        <p class="ws-name">Regalo · <span>Prompts DocuSelling</span></p>
+        <h1>Tu colapso puede ser tu <em>mejor contenido</em>.</h1>
+        <p class="promise">Pon tu idea, pégala en ChatGPT y sale un guion listo para grabar con la fórmula 7-7-5: el momento en que todo se cayó, lo que luchaste y lo que reconstruiste.</p>
+        <div class="formula" aria-label="La fórmula 7-7-5">
+          <div><b>7</b><span>líneas del colapso</span></div>
+          <div><b>7</b><span>líneas de la lucha</span></div>
+          <div><b>5</b><span>líneas del resultado</span></div>
+        </div>
+        <div><button type="button" class="btn" data-start>Quiero mi prompt <span class="arrow" aria-hidden="true">→</span></button></div>
+      </div>
+
+      <!-- 1 · datos -->
+      <div class="step">
+        <h2>¿Para qué quieres <em>tu guion</em>?</h2>
+        <p class="hint">Te damos el prompt de tu camino. Después puedes ver los otros dos.</p>
+        <form id="form" novalidate>
+          <div class="options" role="group" aria-label="Tu camino">
+            <button type="button" class="opt" data-camino="negocio" aria-pressed="false"><span class="k">A</span>Mostrar mi negocio</button>
+            <button type="button" class="opt" data-camino="marca-personal" aria-pressed="false"><span class="k">B</span>Contar mi historia (marca personal)</button>
+            <button type="button" class="opt" data-camino="ugc" aria-pressed="false"><span class="k">C</span>Crear contenido para marcas (UGC)</button>
+          </div>
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" name="nombre" autocomplete="given-name" required>
+          <label for="email">Correo</label>
+          <input type="email" id="email" name="email" autocomplete="email" inputmode="email" required>
+          <label class="check" for="consent">
+            <input type="checkbox" id="consent" name="consent" required>
+            <span>Autorizo el tratamiento de mis datos personales (Ley 1581 de 2012) según la <a href="/privacidad" target="_blank" rel="noopener">política de tratamiento de datos</a> y acepto recibir contenido de Valentina García por correo.</span>
+          </label>
+          <button class="btn block" type="submit" style="margin-top:22px">Ver mi prompt <span class="arrow" aria-hidden="true">→</span></button>
+          <p class="msg" id="msg" role="alert" hidden></p>
+        </form>
+      </div>
+
+      <!-- 2 · prompt -->
+      <div class="step">
+        <p class="eyebrow">Camino <span id="p-nombre"></span></p>
+        <h2><span id="hola"></span>está tu <em>prompt</em></h2>
+        <p class="hint" id="p-para"></p>
+        <div class="prompt-box"><pre id="p-texto"></pre></div>
+        <button type="button" class="btn block" id="copiar">Copiar prompt</button>
+        <ol class="pasos-uso">
+          <li>Pégalo en ChatGPT, Claude o Gemini.</li>
+          <li>Cambia lo que está entre [corchetes] por tu historia.</li>
+          <li>Graba. ¿Qué pasaría si hoy publicas eso que te da miedo?</li>
+        </ol>
+        <p class="small" style="margin-top:18px">Los otros caminos:</p>
+        <div class="tabs-p">
+          <button type="button" class="opt" data-ver="negocio">Negocio</button>
+          <button type="button" class="opt" data-ver="marca-personal">Marca personal</button>
+          <button type="button" class="opt" data-ver="ugc">UGC</button>
+        </div>
+        <div class="step-foot"><a class="link-btn" href="/camino">Descubre tu camino completo con el test de 3 preguntas →</a></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="assets/prompts.js?v=1"></script>
+</body>
+</html>

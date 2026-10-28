@@ -21,7 +21,7 @@ module.exports = async (req, res) => {
   try {
     const [datos, leads, ventas] = await Promise.all([
       rest("rpc/panel_datos", { method: "POST", body: { desde, hasta } }),
-      rest(`leads?select=id,created_at,nombre,email,whatsapp,angulo,indeciso,bloqueo,objetivo,situacion,utm_source,utm_medium,utm_campaign,utm_content&${rango}&order=created_at.desc&limit=1000`),
+      rest(`leads?select=*&${rango}&order=created_at.desc&limit=1000`),
       rest(`ventas?select=id,created_at,transaccion_id,email,producto,monto,moneda,estado,angulo,lead_id&${rango}&order=created_at.desc&limit=1000`)
     ]);
     const compraron = new Set((ventas || []).filter(v => v.estado === "aprobada").map(v => v.lead_id));

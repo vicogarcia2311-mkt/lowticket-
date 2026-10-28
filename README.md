@@ -23,6 +23,7 @@ Construido por ASYGNUZ. Todo corre en cuentas de Valentina (GitHub, Vercel, Supa
 - `/` → redirige a `/camino` conservando las UTM
 - `/camino` → entrada con el test
 - `/camino-negocio`, `/camino-marca-personal`, `/camino-ugc`
+- `/prompts` → 3 prompts DocuSelling (fórmula 7-7-5) a cambio de nombre y correo
 
 ## Estado
 
