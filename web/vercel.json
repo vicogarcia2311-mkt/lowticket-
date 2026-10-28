@@ -1,5 +1,6 @@
 {
   "cleanUrls": true,
+  "rewrites": [{ "source": "/r/:id", "destination": "https://app.asygnuz.com/r/:id" }],
   "headers": [
     {
       "source": "/(.*)",
