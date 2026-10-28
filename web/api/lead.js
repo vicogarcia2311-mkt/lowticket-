@@ -23,6 +23,8 @@ module.exports = async (req, res) => {
 
   const email = (txt(data.email, 200) || "").toLowerCase();
   if (PRODUCTOS_GRATIS.includes(data.producto)) return productoGratis(data, email, res);
+  // Workshop cerrado (web/middleware.js): no se reciben leads del test hasta abrir con WEB_ABIERTA=si.
+  if ((process.env.WEB_ABIERTA || "").trim().toLowerCase() !== "si") return res.status(403).end();
   const lead = {
     nombre: txt(data.nombre, 120),
     email,

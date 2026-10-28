@@ -93,3 +93,9 @@ Correr `supabase/002_leads_unicos_consentimiento.sql`: un lead por correo (se ac
 - Correr `supabase/005_productos.sql`: WhatsApp opcional (los productos gratis piden solo nombre y correo), columna `productos` y función `lead_producto`, que suma el producto sin pisar los datos de quien ya estaba en la lista.
 - Panel: columna y filtro de producto en Leads, y tabla "Por producto" en Resumen (cuántos compraron el workshop después).
 - n8n: el evento `lead_prompts` arma el correo con el link a los prompts; el envío se conecta con el proveedor de correo.
+
+## 11. Web cerrada (expectativa)
+
+- `web/middleware.js` manda `/`, `/camino` y las 3 páginas de camino a `/pronto` ("Algo bonito viene en camino"). `/api/lead` rechaza leads del test (403). `/prompts`, `/privacidad` y `/panel` siguen abiertas.
+- Abrir: en Vercel poner `WEB_ABIERTA` = `si` y hacer Redeploy.
+- Para que el equipo revise lo cerrado: poner `WEB_CLAVE_EQUIPO` en Vercel y entrar una vez con `https://valentinamkt.online/camino?equipo=<clave>` (queda abierto 30 días en ese navegador).
