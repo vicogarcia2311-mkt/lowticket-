@@ -43,7 +43,7 @@ $("#copiar").addEventListener("click", async () => {
   const t = $("#p-texto").textContent;
   try{ await navigator.clipboard.writeText(t); }
   catch(e){ const r = document.createRange(); r.selectNodeContents($("#p-texto")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); document.execCommand("copy"); }
-  $("#copiar").textContent = "¡Copiado! Pégalo en ChatGPT";
+  $("#copiar").textContent = "¡Copiado! Pégalo en tu IA o en Claude";
 });
 
 $("#form").addEventListener("submit", async e => {
