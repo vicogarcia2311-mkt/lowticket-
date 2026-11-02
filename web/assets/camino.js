@@ -483,11 +483,12 @@ function renderAngulo(){
     const cerrado = estado.estado === "cerrado";
     const texto = cerrado ? "Inscripciones cerradas" : lead.email ? "Ya estás en la lista" : "Inscripciones muy pronto";
     msg.innerHTML = cerrado ? "Las inscripciones de esta edición ya cerraron. Déjanos tus datos y te avisamos de la próxima."
-      : lead.email ? `<b>Ya estás en la lista.</b> Serás de las primeras en saber cuándo abren las inscripciones: te avisamos por WhatsApp y correo con tu link directo.`
+      : lead.email ? `<b>Ya estás en la lista.</b> Serás de las primeras en saber cuándo abren las inscripciones: te avisamos por WhatsApp y correo con tu link directo.${CONFIG.whatsappGrupo ? " Entra al grupo de WhatsApp: ahí contamos todo primero." : ""}`
       : `Las inscripciones abren muy pronto y la lista se entera primero. Haz el test y entra para recibir tu link directo.`;
     msg.hidden = false;
     document.querySelectorAll("[data-estado-texto]").forEach(el => el.textContent = texto);
-    btns.forEach(b => b.innerHTML = (cerrado || !lead.email) ? `Entrar a la lista <span class="arrow" aria-hidden="true">→</span>` : `Ya estoy en la lista ✓`);
+    btns.forEach(b => b.innerHTML = (cerrado || !lead.email) ? `Entrar a la lista <span class="arrow" aria-hidden="true">→</span>`
+      : CONFIG.whatsappGrupo ? `Entrar al grupo de WhatsApp <span class="arrow" aria-hidden="true">→</span>` : `Ya estoy en la lista ✓`);
     $(".sticky a").textContent = "Ver lo que incluye";
   }
   aplicarEstado();
@@ -502,6 +503,7 @@ function renderAngulo(){
       if(lead.email) url.searchParams.set("email", lead.email);
       location.href = url.toString();
     } else if(lead.email && estado.estado !== "cerrado"){
+      if(CONFIG.whatsappGrupo){ evento("grupo"); window.open(CONFIG.whatsappGrupo, "_blank", "noopener"); return; }
       evento("clic_espera");
       toast("Ya estás en la lista. Te avisamos el día de la apertura.");
     } else {
