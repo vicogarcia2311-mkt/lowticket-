@@ -36,7 +36,6 @@ const TESTIMONIOS = [];
 /* ---------- utilidades ---------- */
 const $ = (s, el) => (el || document).querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const tbd = (v, ph) => v ? esc(v) : `<mark class="tbd">${ph}</mark>`;
 const usd = n => `USD ${n}`;
 
 function ls(k, v){ try{ if(v === undefined) return JSON.parse(localStorage.getItem(k) || "null"); localStorage.setItem(k, JSON.stringify(v)); }catch(e){ return null; } }
@@ -341,7 +340,6 @@ function renderAngulo(){
       <div><span class="t">Parte 3</span><div><h3>Ejercicio en vivo</h3><p>Escribes tu banco de ideas con Valen guiando.</p></div></div>
       <div><span class="t">Cierre</span><div><h3>Preguntas y respuestas</h3><p>Dudas sobre tu caso, en vivo por ${esc(OFERTA.plataforma)}.</p></div></div>
     </div>
-    <p class="small" style="margin:-12px 0 24px"><mark class="tbd">Orden y minutos por confirmar con Valen</mark></p>
     ${toOffer("Quiero salir con mi banco de ideas")}
   </div></section>
 
@@ -371,9 +369,9 @@ function renderAngulo(){
     <p class="eyebrow">Incluido con tu lugar</p>
     <h2 class="reveal">Tres bonos, <em>uno</em> hecho para tu camino</h2>
     <div class="bonos" style="margin-top:28px">
-      <div class="card bono featured reveal"><span class="tag">★ Bono estrella · tu camino</span><p class="obj">${A.bonoObj}</p><h3>${A.bono}</h3><p>${A.bonoDesc}</p><p class="when"><span>Llega ${tbd(OFERTA.diasBonos ? `en ${OFERTA.diasBonos} días` : "", "en [X] días")} después del vivo</span><span class="val-pair"><s class="val">${usd(V.clase)}</s><em class="incl">Incluido</em></span></p></div>
+      <div class="card bono featured reveal"><span class="tag">★ Bono estrella · tu camino</span><p class="obj">${A.bonoObj}</p><h3>${A.bono}</h3><p>${A.bonoDesc}</p><p class="when"><span>Llega ${OFERTA.diasBonos ? `en ${esc(OFERTA.diasBonos)} días ` : ""}después del vivo</span><span class="val-pair"><s class="val">${usd(V.clase)}</s><em class="incl">Incluido</em></span></p></div>
       <div class="card bono reveal"><span class="tag">Bono 2</span><p class="obj">Para la duda de “no tengo tiempo de crear tanto”</p><h3>PDF “Una idea, cinco formatos”</h3><p>Checklist para contar la misma idea en historias, reel, carrusel, TikTok y video largo o blog, con un ejemplo ya lleno.</p><p class="when"><span>Lo recibes al inscribirte</span><span class="val-pair"><s class="val">${usd(V.pdf)}</s><em class="incl">Incluido</em></span></p></div>
-      <div class="card bono reveal"><span class="tag">Bono 3</span><p class="obj">Para la duda de “¿y cuando se me acaben las ideas?”</p><h3>Tu asistente de ideas con IA</h3><p>Escribes una idea y recibes 3 o 4 opciones de contenido en los cinco formatos.</p><p class="when"><span>Se activa después del vivo · <mark class="tbd">límite de uso</mark></span><span class="val-pair"><s class="val">${usd(V.asistente)}</s><em class="incl">Incluido</em></span></p></div>
+      <div class="card bono reveal"><span class="tag">Bono 3</span><p class="obj">Para la duda de “¿y cuando se me acaben las ideas?”</p><h3>Tu asistente de ideas con IA</h3><p>Escribes una idea y recibes 3 o 4 opciones de contenido en los cinco formatos.</p><p class="when"><span>Se activa después del vivo</span><span class="val-pair"><s class="val">${usd(V.asistente)}</s><em class="incl">Incluido</em></span></p></div>
     </div>
   </div></section>
 
@@ -430,9 +428,9 @@ function renderAngulo(){
   <section class="curve-top" style="--curve-from:var(--second)"><div class="wrap" style="max-width:820px">
     <h2>Preguntas frecuentes</h2>
     <details><summary>¿Es en vivo?</summary><p>Sí. La clase es en directo por ${esc(OFERTA.plataforma)}, dura máximo una hora e incluye un espacio para preguntas.</p></details>
-    <details><summary>¿Y si no puedo conectarme ese día?</summary><p>${OFERTA.replay ? esc(OFERTA.replay) : `<mark class="tbd">Si habrá grabación, por cuántos días estará disponible y cómo se accede</mark>`} Si no puedes asistir, te avisaremos cómo acceder al contenido.</p></details>
+    <details><summary>¿Y si no puedo conectarme ese día?</summary><p>${esc(OFERTA.replay)}</p></details>
     <details><summary>¿Necesito experiencia previa?</summary><p>No. El ejercicio parte de lo que ya haces o de lo que quieres empezar a hacer. Cada persona trabaja con su propio negocio o proyecto.</p></details>
-    <details><summary>¿Qué recibo y cuándo?</summary><p><b>El PDF:</b> inmediatamente después de tu compra.<br><b>La clase de tu camino y el asistente de IA:</b> ${tbd(OFERTA.diasBonos, "[X]")} días después de la clase en vivo.</p></details>
+    <details><summary>¿Qué recibo y cuándo?</summary><p><b>El PDF:</b> inmediatamente después de tu compra.<br><b>La clase de tu camino y el asistente de IA:</b> ${OFERTA.diasBonos ? esc(OFERTA.diasBonos) + " días " : ""}después de la clase en vivo.</p></details>
     <details><summary>¿Tiene garantía?</summary><p>Sí. Si no logramos lo que te prometemos, te devolvemos tu dinero según las condiciones de garantía de Whop.</p></details>
     ${OFERTA.plazas ? `<details><summary>¿Hay cupos?</summary><p>Hay ${esc(OFERTA.plazas)} cupos.</p></details>` : ""}
   </div></section>
