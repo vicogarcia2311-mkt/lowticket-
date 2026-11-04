@@ -1,18 +1,44 @@
 {
   "cleanUrls": true,
-  "rewrites": [{ "source": "/r/:id", "destination": "https://app.asygnuz.com/r/:id" }],
+  "rewrites": [
+    {
+      "source": "/r/:id",
+      "destination": "https://app.asygnuz.com/r/:id"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
       ]
     },
     {
       "source": "/img/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/bio",
+      "destination": "/?utm_source=instagram&utm_medium=bio&utm_campaign=workshop-nov&utm_content=link-bio",
+      "permanent": false
     }
   ]
 }
