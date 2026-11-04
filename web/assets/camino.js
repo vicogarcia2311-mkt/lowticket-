@@ -6,7 +6,7 @@
 const CONFIG = {
   // === COMPLETAR ANTES DE PUBLICAR ===
   // El link de pago NO va aquí: lo entrega /api/config solo cuando el carrito está abierto (variable CHECKOUT_URL en Vercel).
-  politicaVersion: "2026-10-23-borrador", // versión de la política de datos que acepta cada lead
+  politicaVersion: "2026-11-04-borrador", // versión de la política de datos que acepta cada lead
   whatsappGrupo: "https://chat.whatsapp.com/G6nejKSn9Fp1gJEqSW1i70", // grupo de WhatsApp donde el equipo orienta a quien no sabe su camino
   webhookUrl: "/api/lead", // función de Vercel que guarda el lead en Supabase (web/api/lead.js)
   metaPixelId: "",        // ID del pixel de Meta (opcional)
