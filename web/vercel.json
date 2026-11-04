@@ -39,6 +39,46 @@
       "source": "/bio",
       "destination": "/?utm_source=instagram&utm_medium=bio&utm_campaign=workshop-nov&utm_content=link-bio",
       "permanent": false
+    },
+    {
+      "source": "/reel1",
+      "destination": "/?utm_source=instagram&utm_medium=reel&utm_campaign=workshop-nov&utm_content=reel-01",
+      "permanent": false
+    },
+    {
+      "source": "/reel2",
+      "destination": "/?utm_source=instagram&utm_medium=reel&utm_campaign=workshop-nov&utm_content=reel-02",
+      "permanent": false
+    },
+    {
+      "source": "/reel3",
+      "destination": "/?utm_source=instagram&utm_medium=reel&utm_campaign=workshop-nov&utm_content=reel-03",
+      "permanent": false
+    },
+    {
+      "source": "/reel4",
+      "destination": "/?utm_source=instagram&utm_medium=reel&utm_campaign=workshop-nov&utm_content=reel-04",
+      "permanent": false
+    },
+    {
+      "source": "/carrusel1",
+      "destination": "/?utm_source=instagram&utm_medium=carrusel&utm_campaign=workshop-nov&utm_content=carrusel-01",
+      "permanent": false
+    },
+    {
+      "source": "/carrusel2",
+      "destination": "/?utm_source=instagram&utm_medium=carrusel&utm_campaign=workshop-nov&utm_content=carrusel-02",
+      "permanent": false
+    },
+    {
+      "source": "/carrusel3",
+      "destination": "/?utm_source=instagram&utm_medium=carrusel&utm_campaign=workshop-nov&utm_content=carrusel-03",
+      "permanent": false
+    },
+    {
+      "source": "/carrusel4",
+      "destination": "/?utm_source=instagram&utm_medium=carrusel&utm_campaign=workshop-nov&utm_content=carrusel-04",
+      "permanent": false
     }
   ]
 }
