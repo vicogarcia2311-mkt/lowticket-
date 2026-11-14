@@ -1,8 +1,8 @@
 (()=>{"use strict";
 const app=document.getElementById("app"), pixel="1930528057931904";
 const read=(k)=>{try{return sessionStorage.getItem(k)}catch{return null}}, save=(k,v)=>{try{sessionStorage.setItem(k,v)}catch{}};
-const choice=()=>{try{return localStorage.getItem("vm_meta_consent")}catch{return null}};
-const setChoice=v=>{try{localStorage.setItem("vm_meta_consent",v)}catch{}};
+const choice=()=>{try{const raw=localStorage.getItem("vm_meta_consent");if(raw==="yes"||raw==="no")return raw;return JSON.parse(raw||"null")}catch{return null}};
+const setChoice=v=>{try{localStorage.setItem("vm_meta_consent",JSON.stringify(v))}catch{}};
 let started=false,config={live:false};
 function startMeta(){if(choice()!=="yes"||started)return;started=true;!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');window.fbq("consent","grant");window.fbq("init",pixel);window.fbq("track","PageView");if(location.pathname.toLowerCase()==="/vsl")window.fbq("track","ViewContent",{content_name:"DocuSelling VSL"});}
 function event(name,id){if(choice()==="yes"&&window.fbq){const data={content_name:"DocuSelling VSL"};if(id)window.fbq("track",name,data,{eventID:id});else window.fbq("trackCustom",name,data);}}
