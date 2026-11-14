@@ -4,6 +4,10 @@
     {
       "source": "/r/:id",
       "destination": "https://app.asygnuz.com/r/:id"
+    },
+    {
+      "source": "/vsl/:stage(registro|aplicar|gracias|recibido)",
+      "destination": "/vsl.html"
     }
   ],
   "headers": [
@@ -78,6 +82,11 @@
     {
       "source": "/carrusel4",
       "destination": "/?utm_source=instagram&utm_medium=carrusel&utm_campaign=workshop-nov&utm_content=carrusel-04",
+      "permanent": false
+    },
+    {
+      "source": "/VSL",
+      "destination": "/vsl",
       "permanent": false
     }
   ]
