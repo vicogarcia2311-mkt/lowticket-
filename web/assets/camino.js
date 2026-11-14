@@ -9,7 +9,7 @@ const CONFIG = {
   politicaVersion: "2026-11-04-borrador", // versión de la política de datos que acepta cada lead
   whatsappGrupo: "https://chat.whatsapp.com/G6nejKSn9Fp1gJEqSW1i70", // grupo de WhatsApp donde el equipo orienta a quien no sabe su camino
   webhookUrl: "/api/lead", // función de Vercel que guarda el lead en Supabase (web/api/lead.js)
-  metaPixelId: "",        // ID del pixel de Meta (opcional)
+  metaPixelId: "1930528057931904",        // ID del pixel de Meta (opcional)
   paginas: { "ugc": "/camino-ugc", "negocio": "/camino-negocio", "marca-personal": "/camino-marca-personal" },
   // "No estoy segura" en P1 → pantalla del grupo (whatsappGrupo). Si P3 = "Apenas empiezo" sin otra señal → este camino
   anguloPorDefecto: "negocio"
@@ -74,23 +74,52 @@ async function send(payload){
     post(body); return true;
   }
   for(let i = 0; i < 3; i++){
-    if(await post(body)) return true;
+    if(await post(body)){ if(payload.meta_event_id){const queue=ls("vm_cola")||[];ls("vm_cola",queue.filter(b=>{try{return JSON.parse(b).meta_event_id!==payload.meta_event_id;}catch(e){return true;}}));} return true; }
     await new Promise(r => setTimeout(r, 600 * (i + 1)));
   }
-  const cola = ls("vm_cola") || []; cola.push(body); ls("vm_cola", cola.slice(-5));
+  const cola = (ls("vm_cola") || []).filter(b=>{try{return !payload.meta_event_id || JSON.parse(b).meta_event_id!==payload.meta_event_id;}catch(e){return true;}}); cola.push(body); ls("vm_cola", cola.slice(-5));
   return false;
 }
-(async function vaciarCola(){
+Promise.resolve().then(async function vaciarCola(){
   const cola = ls("vm_cola"); if(!cola || !cola.length || !CONFIG.webhookUrl) return;
   const quedan = [];
-  for(const b of cola) if(!(await post(b))) quedan.push(b);
+  for(const b of cola){ let payload;try{payload=JSON.parse(b);}catch(e){continue;} if(!metaAllowed()){delete payload.meta_consent;delete payload.meta_event_id;delete payload.meta_fbp;delete payload.meta_fbc;} if(!(await post(JSON.stringify(payload)))) quedan.push(JSON.stringify(payload)); }
   ls("vm_cola", quedan);
-})();
-if(CONFIG.metaPixelId){
+});
+// Advertising consent is separate from workshop registration.
+const metaAllowed = () => ls("vm_meta_consent") === "yes";
+let metaStarted = false;
+function startMeta(){
+  if(!metaAllowed() || metaStarted || !CONFIG.metaPixelId) return;
+  metaStarted = true;
   !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-  fbq('init', CONFIG.metaPixelId); fbq('track','PageView');
+  window.fbq('consent','grant'); window.fbq('init', CONFIG.metaPixelId); window.fbq('track','PageView');
 }
-function track(name, data){ if(window.fbq) fbq('track', name, data || {}); }
+function track(name, data, id){ if(metaAllowed() && window.fbq){ if(id) window.fbq('track',name,data||{},{eventID:id}); else window.fbq('track',name,data||{}); } }
+function metaCookie(name){const m=document.cookie.split("; ").find(x=>x.startsWith(name+"="));return m?m.slice(name.length+1):"";}
+function metaClickId(){
+  const click=new URLSearchParams(location.search).get("fbclid"), existing=metaCookie("_fbc")||ss("vm_meta_fbc")||"";
+  if(click && /^[A-Za-z0-9_-]{1,500}$/.test(click) && !existing.endsWith("."+click)){const fbc="fb.1."+Date.now()+"."+click;ss("vm_meta_fbc",fbc);return fbc;}
+  return existing;
+}
+function metaDetails(id){
+  if(!metaAllowed()) return {};
+  return {meta_consent:true,meta_event_id:id,meta_fbp:metaCookie("_fbp"),meta_fbc:metaClickId()};
+}
+function metaPreferences(){
+  if(new URLSearchParams(location.search).get("privacidad") === "publicidad"){ ls("vm_meta_consent","ask"); }
+  const prior=ls("vm_meta_consent");
+  if(prior==="yes" || prior==="no"){if(prior==="yes"){metaClickId();startMeta();}return;}
+  const box=document.createElement("aside");
+  box.setAttribute("aria-label","Preferencias de publicidad");
+  box.style.cssText="position:fixed;bottom:12px;left:12px;right:12px;max-width:520px;z-index:9999;background:#fff;color:#222;border:1px solid #bbb;border-radius:12px;padding:16px;box-shadow:0 4px 20px #0002;font:14px/1.5 Poppins,sans-serif";
+  box.innerHTML='<p style="margin:0 0 10px">Con tu permiso, usamos Meta para medir y optimizar anuncios, incluso con datos de registro protegidos mediante hash. Puedes rechazar sin afectar tu inscripción. <a href="/privacidad" target="_blank" rel="noopener">Privacidad</a></p><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" data-meta-yes>Aceptar publicidad</button><button type="button" data-meta-no>Rechazar</button></div>';
+  box.querySelectorAll("button").forEach(b=>b.style.cssText="padding:8px 12px;border:1px solid #555;border-radius:6px;background:white;color:#222;cursor:pointer;font:inherit");
+  box.querySelector("[data-meta-yes]").onclick=()=>{ls("vm_meta_consent","yes");box.remove();metaClickId();startMeta();};
+  box.querySelector("[data-meta-no]").onclick=()=>{ls("vm_meta_consent","no");box.remove();ss("vm_meta_fbc","");if(window.fbq)window.fbq("consent","revoke");};
+  document.body.appendChild(box);
+}
+metaPreferences();
 currentParams(); // guarda las UTM de llegada en sessionStorage
 
 /* ---------- embudo por UTM: visitas y pasos del test (sin datos personales) ---------- */
@@ -177,8 +206,9 @@ function initEntrada(){
 
   const form = $("#lead-form"), msg = $("#msg");
   function showMsg(t){ msg.textContent = t; msg.hidden = false; }
+  let pendingLeadId = "", pendingLeadKey = "", submitting = false;
   form.addEventListener("submit", async e => {
-    e.preventDefault(); msg.hidden = true;
+    e.preventDefault(); if(submitting) return; msg.hidden = true;
     const d = Object.fromEntries(new FormData(form).entries());
     // WhatsApp = código del país elegido + número local (si la persona escribe el número con "+", se respeta tal cual).
     const crudo = (d.whatsapp || "").trim();
@@ -192,13 +222,19 @@ function initEntrada(){
     const angulo = indeciso ? "por-definir" : asignarAngulo(respuestas);
     const lead = { nombre: d.nombre.trim(), email: d.email.trim(), angulo, bloqueo: etiquetas.bloqueo || "", indeciso };
     ss("vm_lead", lead); ls("vm_lead", lead);
-    evento("lead", { angulo: angulo });
     go(indeciso ? steps.indexOf($("[data-grupo-step]")) : steps.length - 1);
-    await send(Object.assign({ event:"lead", producto:"Workshop " + OFERTA.titulo,
+    const leadKey = lead.email.trim().toLowerCase()+"|"+tel;
+    if(pendingLeadKey !== leadKey || !pendingLeadId){ pendingLeadKey=leadKey; pendingLeadId=window.crypto?.randomUUID?.() || nuevoId(); }
+    const meta=metaDetails(pendingLeadId); submitting=true;
+    const saved = await send(Object.assign({ event:"lead", producto:"Workshop " + OFERTA.titulo,
       nombre: lead.nombre, email: lead.email, whatsapp: tel, angulo, bloqueo: lead.bloqueo, indeciso,
       objetivo: etiquetas.objetivo || "", situacion: etiquetas.situacion || "",
-      consentimiento: true, consentimiento_at: new Date().toISOString(), politica_version: CONFIG.politicaVersion }, currentParams()));
-    track("Lead", {content_category: angulo});
+      consentimiento: true, consentimiento_at: new Date().toISOString(), politica_version: CONFIG.politicaVersion }, currentParams(), meta));
+    submitting=false;
+    if(!saved){ go(4); showMsg("No pudimos confirmar tu registro. Intenta nuevamente."); return; }
+    evento("lead", { angulo: angulo });
+    if(meta.meta_event_id) track("Lead", {}, meta.meta_event_id);
+    pendingLeadId=""; pendingLeadKey="";
     if(!indeciso) setTimeout(() => { location.href = CONFIG.paginas[angulo]; }, 900);
   });
 
