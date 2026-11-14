@@ -42,13 +42,13 @@ module.exports=async(req,res)=>{
   if(d.action==="booking"){
    // Only a trusted provider adapter may call this after verifying an actual booking.
    if(!eq(req.headers["x-vsl-booking-secret"],process.env.VSL_BOOKING_SECRET))return fail(res,401,"No autorizado.");
-   if(!tokenOK(d.token)||!text(d.bookingId,200))return fail(res,422,"Reserva inválida.");
-   const row=await find(d.token);if(!row||!["qualified","booked"].includes(row.status))return fail(res,409,"Aplicación no calificada.");
+   if(typeof d.applicationId!=="string"||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(d.applicationId)||!text(d.bookingId,200))return fail(res,422,"Reserva inválida.");
+   const bookingQuery="vsl_applications?id=eq."+d.applicationId;const rows=await rest(bookingQuery+"&select=*&limit=1");const row=rows?.[0];if(!row||!["qualified","booked"].includes(row.status))return fail(res,409,"Aplicación no calificada.");
    const bookingId=text(d.bookingId,200);if(row.booking_id&&row.booking_id!==bookingId)return fail(res,409,"Ya existe una reserva.");
    const eventId=row.schedule_event_id||hash("vsl-schedule:"+row.id+":"+bookingId).slice(0,32);
-   if(row.status!=="booked"){const updated=await rest(query(d.token)+"&status=eq.qualified",{method:"PATCH",body:{status:"booked",booking_id:bookingId,schedule_event_id:eventId,booked_at:new Date().toISOString()},prefer:"return=representation"});if(!updated?.length)return fail(res,409,"Reserva ya procesada; reintenta.");}
+   if(row.status!=="booked"){const updated=await rest(bookingQuery+"&status=eq.qualified",{method:"PATCH",body:{status:"booked",booking_id:bookingId,schedule_event_id:eventId,booked_at:new Date().toISOString()},prefer:"return=representation"});if(!updated?.length)return fail(res,409,"Reserva ya procesada; reintenta.");}
    if(row.schedule_meta_sent)return res.status(200).json({ok:true,duplicate:true});
-   const sent=await meta("Schedule",eventId,row,req);if(sent)await rest(query(d.token),{method:"PATCH",body:{schedule_meta_sent:true},prefer:"return=minimal"});
+   const sent=await meta("Schedule",eventId,row,req);if(sent)await rest(bookingQuery,{method:"PATCH",body:{schedule_meta_sent:true},prefer:"return=minimal"});
    return res.status(200).json({ok:true,metaSent:sent});
   }
   if(!tokenOK(d.token))return fail(res,401,"Inicia tu aplicación.");
@@ -67,7 +67,7 @@ module.exports=async(req,res)=>{
    let calendarUrl=null;
    if(["qualified","booked"].includes(row.status)){
     // Provider must preserve this opaque reference and return it to its verified webhook adapter.
-    const c=new URL(process.env.VSL_CALENDAR_URL);c.searchParams.set("utm_content",d.token);calendarUrl=c.href;
+    const c=new URL(process.env.VSL_CALENDAR_URL);c.searchParams.set("utm_content",row.id);calendarUrl=c.href;
    }
    return res.status(200).json({status:row.status,calendarUrl});
   }
