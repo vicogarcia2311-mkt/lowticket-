@@ -202,7 +202,7 @@ function initEntrada(){
     }));
   });
   document.querySelectorAll("[data-back]").forEach(b => b.addEventListener("click", () => go(Math.max(0, current - 1))));
-  $("[data-start]").addEventListener("click", () => { evento("test_inicio"); track("ViewContent", {content_name:"test_angulo"}); go(1); });
+  document.querySelectorAll("[data-start]").forEach(b => b.addEventListener("click", () => { evento("test_inicio"); track("ViewContent", {content_name:"test_angulo"}); go(1); }));
 
   const form = $("#lead-form"), msg = $("#msg");
   function showMsg(t){ msg.textContent = t; msg.hidden = false; }

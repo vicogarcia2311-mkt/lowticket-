@@ -1,0 +1,50 @@
+/* Solo portada: el test, formulario, resultados, FAQ y bonos mantienen estilos originales */
+.entrada:not(.started) .photo-panel,
+.entrada:not(.started) .topbar{display:none!important}
+.entrada:not(.started) .entrada-grid{display:block;max-width:780px;margin:0 auto;min-height:0}
+.entrada:not(.started) .panel{display:block;max-width:none;margin:18px 12px 36px;padding:36px 30px 22px;border:2px solid #1b1b1b;background:#fff;overflow:visible;isolation:auto}
+.entrada:not(.started) .panel:before{display:none}
+.entrada:not(.started) .portada.step{display:block;max-width:none;padding:0;animation:in .35s ease both}
+.portada-pill{max-width:620px;margin:0 auto;text-align:center;border:2px solid #191919;background:#e7def7;border-radius:999px;font-size:16px;font-weight:400;line-height:1.5;padding:12px 13px}
+.portada-pill mark{font-weight:600;background:#fff09a;padding:2px 5px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.portada-visual{position:relative;max-width:660px;margin:12px auto 14px}
+.portada-visual .idea-art{display:block;width:100%;height:auto;overflow:visible}
+.portada-live{position:absolute;top:5%;right:2%;width:96px;height:106px;background:#1b1b1b;clip-path:polygon(50% 0%,59% 11%,70% 2%,76% 16%,90% 12%,90% 27%,100% 32%,93% 46%,100% 57%,87% 66%,90% 81%,75% 83%,67% 98%,55% 90%,42% 100%,35% 87%,18% 91%,17% 76%,3% 70%,11% 56%,0% 45%,12% 35%,7% 20%,23% 18%,30% 4%,42% 12%);display:grid;place-items:center}
+.portada-live:before{content:"";inset:3px;position:absolute;background:#fff09a;clip-path:inherit}
+.portada-live span{z-index:1;text-align:center;display:block;font:700 14px/1.4 Poppins,Arial,sans-serif}
+.portada-live small{display:block;font-size:13px;font-weight:500}
+.portada-promise{font:400 clamp(17px,2.8vw,21px)/1.55 Poppins,Arial,sans-serif;text-align:center;max-width:565px;margin:8px auto 29px;letter-spacing:normal}
+.portada-cta{display:block;width:100%;min-height:79px;border:2px solid #171717;border-radius:23px;background:#fff09a;box-shadow:0 5px 0 #161616;color:#161616;font:700 clamp(13px,2.5vw,19px)/1.3 Poppins,Arial,sans-serif;cursor:pointer;padding:15px 48px 15px 25px;position:relative;text-align:center;transition:transform .15s,box-shadow .15s}
+.portada-cta:hover{transform:translateY(-2px);box-shadow:0 7px 0 #161616}
+.portada-cta:active{transform:translateY(3px);box-shadow:0 2px 0 #161616}
+.portada-cta span{position:absolute;right:22px;top:50%;transform:translateY(-50%);font-size:29px;font-weight:400}
+.portada-help{font-size:14px;color:#777;text-align:center;margin:23px auto 34px;max-width:520px}
+.portada-rule{border:0;border-top:1px solid #d4d4d4;margin:36px 0 40px}
+.portada-bio{display:grid;grid-template-columns:44% 1fr;gap:30px;align-items:center;padding:0}
+.portada-bio img{width:100%;height:344px;object-fit:cover;object-position:50% 20%;background:#888}
+.portada-bio h2{font:700 clamp(23px,4vw,34px)/1.24 Poppins,Arial,sans-serif;letter-spacing:-.025em;margin:0 0 17px}
+.portada-role{font-size:17px;font-weight:600;margin:0 0 26px}
+.portada-text{font-size:18px;line-height:1.55;color:#656565;margin:0}
+.portada-cta-second{margin-top:56px}
+.portada-footer{text-align:center;padding:30px 0 3px}
+.portada-footer a{text-decoration:none;color:#888;font-size:13px}
+.portada-footer a:hover{text-decoration:underline}
+@media(max-width:600px){
+ .entrada:not(.started) .panel{margin:12px 10px 24px;padding:25px 19px 21px}
+ .portada-pill{font-size:clamp(11px,2.7vw,15px);padding:10px 7px}
+ .portada-visual{margin:12px -14px 13px}
+ .portada-live{width:66px;height:73px;right:1%;top:2%}
+ .portada-live span{font-size:10px}.portada-live small{font-size:10px}
+ .portada-promise{font-size:17px;margin:10px auto 25px}
+ .portada-cta{min-height:68px;padding:12px 32px 12px 12px;border-radius:18px;font-size:clamp(11px,3.2vw,15px)}
+ .portada-cta span{right:11px;font-size:21px}
+ .portada-help{font-size:12px;margin:18px auto 29px}
+ .portada-rule{margin:28px 0 31px}
+ .portada-bio{grid-template-columns:44% 1fr;gap:16px;align-items:start}
+ .portada-bio img{height:240px}
+ .portada-bio h2{font-size:clamp(19px,5.6vw,28px);margin:5px 0 12px}
+ .portada-role{font-size:12px;margin-bottom:18px}
+ .portada-text{font-size:13px}
+ .portada-cta-second{margin-top:36px}
+}
+@media(max-width:340px){.portada-bio img{height:210px}.portada-bio{gap:11px}.portada-text{font-size:12px}}
