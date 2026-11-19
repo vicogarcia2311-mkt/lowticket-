@@ -23,15 +23,25 @@ const OFERTA = {
   plataforma: "YouTube",      // dónde se transmite la clase en vivo
   plazas: "",                 // ej. "150"; si queda vacío dice "Plazas limitadas"
   replay: "Sí. La clase queda grabada y tienes acceso de por vida a la grabación, a la clase de tu camino y al PDF desde tu cuenta de Whop.",
-  diasBonos: "",              // en cuántos días se entregan la clase del camino y el asistente
+  diasBonos: "1",             // los bonos se entregan un día después de la clase en vivo
   garantia: "",               // política de reembolso definida (ver FAQ)
-  // Valores de referencia de los bonos (USD), tachados en la oferta. PROPUESTA: confirmar.
-  valores: { clase: 40, pdf: 10, asistente: 30 }   // valor de referencia de cada bono (se muestra tachado)
+  // Valores de referencia de los bonos (USD).
+  valores: { clase: 40, pdf: 10, asistente: 30 }
 };
 
-// Capturas reales de alumnas (con autorización). Mientras esté vacío, la sección no se muestra.
-// Formato: { img: "img/testimonio-1.jpg", alt: "Mensaje de ... sobre ..." }
-const TESTIMONIOS = [];
+// Capturas reales de mensajes de alumnas y resultados en Instagram.
+const TESTIMONIOS = [
+  { img: "img/testimonio-mariam.jpg", w: 1160, h: 1280, alt: "Mensaje de Mariam sobre su llamada de diagnóstico: todo mejoró de inmediato y ya ve su perfil con más claridad" },
+  { img: "img/testimonio-asesoria-1.jpg", w: 1280, h: 714, alt: "Mensaje de alumna: la asesoría marcó un antes y un después para crear contenido y diferenciarse para vender" },
+  { img: "img/testimonio-asesoria-2.jpg", w: 1280, h: 816, alt: "Mensaje de alumna: claridad con la estrategia para optimizar el perfil, construir un sistema e identidad de marca" },
+  { img: "img/testimonio-dinamica.jpg", w: 1239, h: 428, alt: "Mensaje de alumna agradeciendo ver la creación de contenido de forma más fácil y dinámica para conectar" },
+  { img: "img/testimonio-documentar.jpg", w: 1280, h: 368, alt: "Mensaje de alumna: me habían hablado mucho de documentar mi proceso pero nunca de esta forma" }
+];
+const RESULTADOS = [
+  { img: "img/resultado-reel-19k.jpg", w: 590, h: 1280, label: "19.057 visualizaciones · 442 guardados · 133 seguidores nuevos", alt: "Estadísticas de Reel con 19,057 visualizaciones, 13,956 cuentas alcanzadas y 442 guardados" },
+  { img: "img/resultado-reel-10k.jpg", w: 934, h: 1280, label: "10.287 visualizaciones · 352 compartidos · 304 guardados", alt: "Estadísticas de Reel con 10,287 visualizaciones, 1,104 interacciones y 352 compartidos" },
+  { img: "img/resultado-historias.jpg", w: 1280, h: 302, wide: true, label: "1.807 personas viendo las historias", alt: "Estadísticas de historias en Instagram con 1.807 visualizaciones" }
+];
 
 /* ---------- utilidades ---------- */
 const $ = (s, el) => (el || document).querySelector(s);
@@ -405,23 +415,23 @@ function renderAngulo(){
     <p class="eyebrow">Incluido con tu lugar</p>
     <h2 class="reveal">Tres bonos, <em>uno</em> hecho para tu camino</h2>
     <div class="bonos" style="margin-top:28px">
-      <div class="card bono featured reveal"><span class="tag">★ Bono estrella · tu camino</span><p class="obj">${A.bonoObj}</p><h3>${A.bono}</h3><p>${A.bonoDesc}</p><p class="when"><span>Llega ${OFERTA.diasBonos ? `en ${esc(OFERTA.diasBonos)} días ` : ""}después del vivo</span><span class="val-pair"><s class="val">${usd(V.clase)}</s><em class="incl">Incluido</em></span></p></div>
-      <div class="card bono reveal"><span class="tag">Bono 2</span><p class="obj">Para la duda de “no tengo tiempo de crear tanto”</p><h3>PDF “Una idea, cinco formatos”</h3><p>Checklist para contar la misma idea en historias, reel, carrusel, TikTok y video largo o blog, con un ejemplo ya lleno.</p><p class="when"><span>Lo recibes al inscribirte</span><span class="val-pair"><s class="val">${usd(V.pdf)}</s><em class="incl">Incluido</em></span></p></div>
-      <div class="card bono reveal"><span class="tag">Bono 3</span><p class="obj">Para la duda de “¿y cuando se me acaben las ideas?”</p><h3>Tu asistente de ideas con IA</h3><p>Escribes una idea y recibes 3 o 4 opciones de contenido en los cinco formatos.</p><p class="when"><span>Se activa después del vivo</span><span class="val-pair"><s class="val">${usd(V.asistente)}</s><em class="incl">Incluido</em></span></p></div>
+      <div class="card bono featured reveal"><span class="tag">★ Bono estrella · tu camino</span><p class="obj">${A.bonoObj}</p><h3>${A.bono}</h3><p>${A.bonoDesc}</p><p class="when"><span>Llega un día después de la clase</span><span class="val-pair"><span class="val">${usd(V.clase)}</span><em class="incl">Incluido</em></span></p></div>
+      <div class="card bono reveal"><span class="tag">Bono 2</span><p class="obj">Para la duda de “no tengo tiempo de crear tanto”</p><h3>PDF “Una idea, cinco formatos”</h3><p>Checklist para contar la misma idea en historias, reel, carrusel, TikTok y video largo o blog, con un ejemplo ya lleno.</p><p class="when"><span>Llega un día después de la clase</span><span class="val-pair"><span class="val">${usd(V.pdf)}</span><em class="incl">Incluido</em></span></p></div>
+      <div class="card bono reveal"><span class="tag">Bono 3</span><p class="obj">Para la duda de “¿y cuando se me acaben las ideas?”</p><h3>Tu asistente de ideas con IA</h3><p>Escribes una idea y recibes 3 o 4 opciones de contenido en los cinco formatos.</p><p class="when"><span>Se activa un día después de la clase</span><span class="val-pair"><span class="val">${usd(V.asistente)}</span><em class="incl">Incluido</em></span></p></div>
     </div>
   </div></section>
 
   <section class="sec-yellow curve-top" id="oferta" style="--curve-from:var(--bg)"><div class="wrap">
-    <div class="oferta-card reveal">
+    <div class="oferta-card">
       <p class="eyebrow" style="color:var(--muted)">Tu lugar en el workshop</p>
       <h2 style="font-size:1.6rem">${esc(OFERTA.titulo)}</h2>
       <ul class="stack">
         <li><span>Workshop en vivo de 1 hora con Valen <small class="stack-note">+ grabación con acceso de por vida</small></span><span data-precio-regular class="por-revelar">Por revelar</span></li>
-        <li class="star-line"><span>★ ${A.bono}</span><span class="val-pair"><s class="val">${usd(V.clase)}</s><em class="incl">Incluido</em></span></li>
-        <li><span>PDF “Una idea, cinco formatos”</span><span class="val-pair"><s class="val">${usd(V.pdf)}</s><em class="incl">Incluido</em></span></li>
-        <li><span>Asistente de ideas con IA</span><span class="val-pair"><s class="val">${usd(V.asistente)}</s><em class="incl">Incluido</em></span></li>
+        <li class="star-line"><span>★ ${A.bono}</span><span class="val-pair"><span class="val">${usd(V.clase)}</span><em class="incl">Incluido</em></span></li>
+        <li><span>PDF “Una idea, cinco formatos”</span><span class="val-pair"><span class="val">${usd(V.pdf)}</span><em class="incl">Incluido</em></span></li>
+        <li><span>Asistente de ideas con IA</span><span class="val-pair"><span class="val">${usd(V.asistente)}</span><em class="incl">Incluido</em></span></li>
       </ul>
-      <p class="total"><span data-total-label>Valor de los bonos</span><s class="val" data-total>${usd(totalBonos)}</s></p>
+      <p class="total"><span data-total-label>Valor de los bonos</span><strong class="val-orig" data-total>${usd(totalBonos)}</strong></p>
       <div data-precio-bloque>
         <div class="expectativa">
           <p class="exp-tit">Pronto te <em>regalamos</em> todo esto</p>
@@ -435,14 +445,17 @@ function renderAngulo(){
     </div>
   </div></section>
 
-  ${TESTIMONIOS.length ? `<section><div class="wrap">
-    <p class="eyebrow">Lo que dicen</p>
-    <h2>Mensajes de <em>alumnas</em></h2>
-    <div class="proof" style="margin-top:28px">${TESTIMONIOS.map(t => `<img src="${t.img}" alt="${esc(t.alt)}" loading="lazy">`).join("")}</div>
+  ${(TESTIMONIOS.length || RESULTADOS.length) ? `<section class="sec-proof curve-top" style="--curve-from:var(--accent)"><div class="wrap">
+    <p class="eyebrow">Lo que dicen y logran</p>
+    <h2>Mensajes de <em>alumnas</em> y resultados reales</h2>
+    <p class="lead">Capturas reales de personas que ya aplicaron el método y el alcance que genera crear con estructura.</p>
+    ${TESTIMONIOS.length ? `<div class="proof-msgs">${TESTIMONIOS.map(t => `<figure class="proof-card"><img src="${t.img}" alt="${esc(t.alt)}" width="${t.w}" height="${t.h}" loading="lazy"></figure>`).join("")}</div>` : ""}
+    ${RESULTADOS.length ? `<h3 class="proof-sub">Resultados en pantalla</h3>
+    <div class="proof-stats">${RESULTADOS.map(r => `<figure class="proof-card ${r.wide ? "is-wide" : "is-tall"}"><img src="${r.img}" alt="${esc(r.alt)}" width="${r.w}" height="${r.h}" loading="lazy"><figcaption>${esc(r.label)}</figcaption></figure>`).join("")}</div>` : ""}
   </div></section>` : ""}
 
 
-  <section class="sec-second curve-top" style="--curve-from:var(--accent)"><div class="wrap grid g2" style="gap:48px">
+  <section class="sec-second curve-top" style="--curve-from:${(TESTIMONIOS.length || RESULTADOS.length) ? "var(--bg)" : "var(--accent)"}"><div class="wrap grid g2" style="gap:48px">
     <div>
       <h2>Es para ti si…</h2>
       <ul class="nolist yeslist">
@@ -466,7 +479,7 @@ function renderAngulo(){
     <details><summary>¿Es en vivo?</summary><p>Sí. La clase es en directo por ${esc(OFERTA.plataforma)}, dura máximo una hora e incluye un espacio para preguntas.</p></details>
     <details><summary>¿Y si no puedo conectarme ese día?</summary><p>${esc(OFERTA.replay)}</p></details>
     <details><summary>¿Necesito experiencia previa?</summary><p>No. El ejercicio parte de lo que ya haces o de lo que quieres empezar a hacer. Cada persona trabaja con su propio negocio o proyecto.</p></details>
-    <details><summary>¿Qué recibo y cuándo?</summary><p><b>El PDF:</b> inmediatamente después de tu compra.<br><b>La clase de tu camino y el asistente de IA:</b> ${OFERTA.diasBonos ? esc(OFERTA.diasBonos) + " días " : ""}después de la clase en vivo.</p></details>
+    <details><summary>¿Qué recibo y cuándo?</summary><p><b>Al inscribirte:</b> acceso inmediato a tu cuenta de Whop con la confirmación de tu cupo y los datos de la clase en vivo.<br><b>Un día después de la clase en vivo:</b> se desbloquean todos tus bonos (la clase grabada de tu camino, el PDF “Una idea, cinco formatos” y el asistente de ideas con IA), además de la grabación del taller con acceso de por vida.</p></details>
     <details><summary>¿Tiene garantía?</summary><p>Sí. Si no logramos lo que te prometemos, te devolvemos tu dinero según las condiciones de garantía de Whop.</p></details>
     ${OFERTA.plazas ? `<details><summary>¿Hay cupos?</summary><p>Hay ${esc(OFERTA.plazas)} cupos.</p></details>` : ""}
   </div></section>
@@ -504,9 +517,9 @@ function renderAngulo(){
       const P = estado.precio, R = estado.precioRegular;
       if(P){
         const copTxt = estado.precioCOP ? `≈ $${esc(estado.precioCOP)} COP` : "";
-        document.querySelectorAll("[data-precio-dato]").forEach(el => el.innerHTML = `${R ? `<s class="val">${usd(R)}</s> ` : ""}${usd(P)} <span class="cop">${copTxt} · precio de lanzamiento</span>`);
-        document.querySelectorAll("[data-precio-regular]").forEach(el => el.outerHTML = R ? `<s class="val">${usd(R)}</s>` : "");
-        if(R){ $("[data-total-label]").textContent = "Valor total"; $("[data-total]").textContent = usd(R + totalBonos); }
+        document.querySelectorAll("[data-precio-dato]").forEach(el => el.innerHTML = `${R ? `<span class="val-orig-inline">Precio original ${usd(R)}</span> ` : ""}<strong>${usd(P)}</strong> <span class="cop">${copTxt} · precio de lanzamiento</span>`);
+        document.querySelectorAll("[data-precio-regular]").forEach(el => el.outerHTML = R ? `<span class="val">${usd(R)}</span>` : "");
+        if(R){ $("[data-total-label]").textContent = "Precio original"; $("[data-total]").textContent = usd(R + totalBonos); }
         $("[data-precio-bloque]").innerHTML = `<p class="price-now"><span style="font-weight:600">Hoy pagas</span><span class="price-pair"><strong>${usd(P)}</strong><span class="cop">${copTxt}</span></span></p>
           <p class="urgencia">Precio de lanzamiento: <b>todo por ${usd(P)}</b>, solo en esta edición. La clase queda grabada: <b>acceso de por vida</b> a la grabación, la clase de tu camino y el PDF.</p>`;
         $(".sticky a").textContent = "Reservar mi lugar · " + usd(P);
