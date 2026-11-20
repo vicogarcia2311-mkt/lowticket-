@@ -121,10 +121,9 @@ function metaPreferences(){
   const prior=ls("vm_meta_consent");
   if(prior==="yes" || prior==="no"){if(prior==="yes"){metaClickId();startMeta();}return;}
   const box=document.createElement("aside");
+  box.className="meta-consent";
   box.setAttribute("aria-label","Preferencias de publicidad");
-  box.style.cssText="position:fixed;bottom:12px;left:12px;right:12px;max-width:520px;z-index:9999;background:#fff;color:#222;border:1px solid #bbb;border-radius:12px;padding:16px;box-shadow:0 4px 20px #0002;font:14px/1.5 Poppins,sans-serif";
-  box.innerHTML='<p style="margin:0 0 10px">Con tu permiso, usamos Meta para medir y optimizar anuncios, incluso con datos de registro protegidos mediante hash. Puedes rechazar sin afectar tu inscripción. <a href="/privacidad" target="_blank" rel="noopener">Privacidad</a></p><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" data-meta-yes>Aceptar publicidad</button><button type="button" data-meta-no>Rechazar</button></div>';
-  box.querySelectorAll("button").forEach(b=>b.style.cssText="padding:8px 12px;border:1px solid #555;border-radius:6px;background:white;color:#222;cursor:pointer;font:inherit");
+  box.innerHTML='<p>Con tu permiso, usamos Meta para medir anuncios. Puedes rechazar sin afectar tu inscripción. <a href="/privacidad" target="_blank" rel="noopener">Privacidad</a></p><div class="meta-consent-actions"><button type="button" data-meta-yes>Aceptar</button><button type="button" data-meta-no>Rechazar</button></div>';
   box.querySelector("[data-meta-yes]").onclick=()=>{ls("vm_meta_consent","yes");box.remove();metaClickId();startMeta();};
   box.querySelector("[data-meta-no]").onclick=()=>{ls("vm_meta_consent","no");box.remove();ss("vm_meta_fbc","");if(window.fbq)window.fbq("consent","revoke");};
   document.body.appendChild(box);
@@ -289,39 +288,69 @@ const ANGULOS = {
 
 const CLIPS = ["clip01","clip02","clip03","clip04","clip05","clip06","clip07","clip08"]; // web/media, 5 s, sin audio
 
-/* Collage de videos de la bio: todos a la vez → uno solo en grande → todos… */
+/* Collage de videos de la bio: 8 portadas reales de fondo + 1 solo <video> optimizado para móvil/iOS */
 function initReel(){
   const reel = $("[data-reel]"); if(!reel) return;
-  const tiles = [...reel.querySelectorAll(".reel-grid video")], solo = reel.querySelector(".reel-solo video");
+  const solo = reel.querySelector(".reel-solo video");
+  const playBtn = reel.querySelector("[data-reel-play]");
+  const countEl = reel.querySelector("[data-reel-count]");
+  const prevBtn = reel.querySelector("[data-reel-prev]");
+  const nextBtn = reel.querySelector("[data-reel-next]");
   const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let i = 0, started = false;
-  tiles.concat(solo).forEach(v => { v.muted = true; v.defaultMuted = true; }); // iOS solo reproduce solo si muted es propiedad, no solo atributo
-  const playAll = () => tiles.forEach(v => { if(!v.src) v.src = v.dataset.src; v.play().catch(() => {}); });
-  const espera = ms => new Promise(r => setTimeout(r, ms));
-  // Ritmo: 1) flash rápido de todos los cortes a pantalla completa → 2) aparecen todos juntos → 3) uno por uno en grande.
-  async function ciclo(){
-    for(;;){
-      reel.classList.remove("is-solo", "is-appear"); reel.classList.add("is-flash");
-      for(const t of tiles){ tiles.forEach(x => x.classList.toggle("on", x === t)); await espera(260); }
-      tiles.forEach(x => x.classList.remove("on"));
-      reel.classList.remove("is-flash"); reel.classList.add("is-appear");
-      await espera(2600);
-      for(const t of tiles){
-        solo.src = t.dataset.src; solo.play().catch(() => {});
-        reel.classList.add("is-solo");
-        await espera(1900);
+  let idx = 0, timer = null, inView = false, loaded = false;
+
+  solo.muted = true;
+  solo.defaultMuted = true;
+  solo.playsInline = true;
+  solo.setAttribute("muted", "");
+  solo.setAttribute("playsinline", "");
+  solo.setAttribute("webkit-playsinline", "");
+
+  function showClip(nextIdx, autoPlay){
+    idx = (nextIdx + CLIPS.length) % CLIPS.length;
+    const c = CLIPS[idx];
+    if(countEl) countEl.textContent = `${idx + 1}/${CLIPS.length}`;
+    reel.querySelectorAll(".reel-grid img").forEach((img, n) => img.classList.toggle("active", n === idx));
+    solo.poster = `media/${c}.jpg`;
+    solo.src = `media/${c}.mp4`;
+    solo.load();
+    loaded = true;
+    if(autoPlay && !quieto){
+      const p = solo.play();
+      if(p && p.then){
+        p.then(() => { if(playBtn) playBtn.hidden = true; })
+         .catch(() => { if(playBtn) playBtn.hidden = false; });
       }
-      reel.classList.remove("is-solo");
-      await espera(900);
     }
   }
+
+  function scheduleNext(){
+    clearTimeout(timer);
+    if(!inView || quieto) return;
+    timer = setTimeout(() => { showClip(idx + 1, true); scheduleNext(); }, 3600);
+  }
+
+  if(playBtn){
+    playBtn.addEventListener("click", () => {
+      if(!loaded) showClip(idx, false);
+      solo.muted = true;
+      solo.play().then(() => { playBtn.hidden = true; scheduleNext(); }).catch(() => {});
+    });
+  }
+  if(prevBtn) prevBtn.addEventListener("click", () => { showClip(idx - 1, true); scheduleNext(); });
+  if(nextBtn) nextBtn.addEventListener("click", () => { showClip(idx + 1, true); scheduleNext(); });
+
   new IntersectionObserver(([e]) => {
-    if(e.isIntersecting){
-      if(quieto) return;               // con "reducir movimiento" quedan las portadas quietas
-      playAll(); if(reel.classList.contains("is-solo")) solo.play().catch(() => {});
-      if(!started){ started = true; ciclo(); }
-    } else { tiles.concat(solo).forEach(v => v.pause()); }
-  }, {threshold:.25}).observe(reel);
+    inView = e.isIntersecting;
+    if(inView){
+      if(!loaded) showClip(0, !quieto);
+      else if(!quieto) solo.play().then(() => { if(playBtn) playBtn.hidden = true; }).catch(() => { if(playBtn) playBtn.hidden = false; });
+      scheduleNext();
+    } else {
+      clearTimeout(timer);
+      if(loaded) solo.pause();
+    }
+  }, { rootMargin: "180px 0px", threshold: .1 }).observe(reel);
 }
 
 const MARQUEE = ["De una idea a infinitos contenidos","Documenta tu día","Estructura 70/30","Tu camino, no el de otra","Workshop en vivo"].map(t => `<span>${t}</span>`).join("");
@@ -391,9 +420,18 @@ function renderAngulo(){
 
   <section class="sec-yellow curve-top bio-sec" style="--curve-from:var(--second)"><div class="wrap quote-grid">
     <div class="reel" data-reel aria-label="Videos de Valentina García trabajando">
-      <div class="reel-grid">${CLIPS.map((c, n) => `<video muted playsinline loop preload="none" poster="media/${c}.jpg" data-src="media/${c}.mp4" style="--i:${n}" aria-hidden="true"></video>`).join("")}</div>
-      <div class="reel-solo"><video muted playsinline loop preload="none" aria-hidden="true"></video></div>
-      <span class="reel-tag">Procesos reales</span>
+      <div class="reel-grid" aria-hidden="true">${CLIPS.map((c, n) => `<img src="media/${c}.jpg" alt="" width="432" height="768" loading="lazy"${n === 0 ? ' class="active"' : ""}>`).join("")}</div>
+      <div class="reel-solo">
+        <video muted playsinline webkit-playsinline autoplay loop preload="metadata" disableRemotePlayback poster="media/${CLIPS[0]}.jpg" aria-label="Clip de Valentina García creando contenido"></video>
+        <button type="button" class="reel-play" data-reel-play aria-label="Reproducir video" hidden>▶ Ver video</button>
+      </div>
+      <div class="reel-bar">
+        <span class="reel-tag">Procesos reales · <b data-reel-count>1/${CLIPS.length}</b></span>
+        <div class="reel-nav">
+          <button type="button" data-reel-prev aria-label="Video anterior">‹</button>
+          <button type="button" data-reel-next aria-label="Video siguiente">›</button>
+        </div>
+      </div>
     </div>
     <div>
       <p class="bio-label">Quién te enseña</p>
