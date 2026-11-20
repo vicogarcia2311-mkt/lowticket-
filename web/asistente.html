@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Asistente de ideas · Valentina García</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#E6DEFF">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--ink:#111;--muted:#5A5A5A;--line:#DCD9D2;--lila:#E6DEFF;--suave:#F6F3FF;--ama:#FFF393}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Poppins",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px}
+header{background:var(--lila);padding:22px 0 54px;border-radius:0 0 36px 36px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.top img{height:46px;width:auto}
+.tag{display:inline-block;background:var(--ama);font-weight:600;font-size:.82rem;padding:5px 14px;border-radius:99px}
+h1{font-weight:600;font-size:clamp(1.9rem,6vw,2.9rem);line-height:1.1;letter-spacing:-.02em;margin:26px 0 10px}
+h1 em,h2 em{font-style:normal;background:linear-gradient(transparent 62%,var(--ama) 62%)}
+header p{margin:0;max-width:600px}
+.card{background:#fff;border:1.5px solid var(--ink);border-radius:24px;padding:22px;margin:-30px 0 24px;position:relative}
+label,.lbl{display:block;font-weight:600;font-size:.92rem;margin:0 0 6px}
+input[type=email],input[type=text],textarea,select{width:100%;font:inherit;border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;background:#fff;color:var(--ink)}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--ink)}
+textarea{min-height:90px;resize:vertical}
+.field{margin-bottom:18px}
+.chips{display:grid;gap:8px}
+.chips.c3{grid-template-columns:repeat(3,1fr)}.chips.c2{grid-template-columns:repeat(2,1fr)}
+.chips input{position:absolute;opacity:0}
+.chips span{display:block;text-align:center;border:1.5px solid var(--line);border-radius:14px;padding:10px 6px;font-weight:500;font-size:.9rem;cursor:pointer;height:100%}
+.chips input:checked+span{background:var(--ama);border-color:var(--ink)}
+.chips input:focus-visible+span{outline:2px solid var(--ink);outline-offset:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;font:inherit;font-weight:600;background:var(--ink);color:#fff;border:0;border-radius:99px;padding:14px 22px;cursor:pointer}
+.btn:disabled{opacity:.55;cursor:wait}
+.btn.sec{background:#fff;color:var(--ink);border:1.5px solid var(--ink);width:auto;padding:9px 18px;font-size:.9rem}
+.small{font-size:.85rem;color:var(--muted)}
+.msg{border-radius:14px;padding:12px 14px;margin-top:14px;font-size:.92rem;background:#FFE8E5}
+.opt{font-weight:400;color:var(--muted)}
+.tabs-main{display:flex;gap:6px;overflow-x:auto;margin:6px 0 18px;padding-bottom:4px}
+.tabs-main button{font:inherit;font-weight:600;font-size:.9rem;white-space:nowrap;border:1.5px solid var(--ink);background:#fff;border-radius:99px;padding:8px 16px;cursor:pointer;color:var(--ink)}
+.tabs-main button[aria-selected=true]{background:var(--ink);color:#fff}
+.estrategia{border-radius:20px;background:var(--ama);padding:16px 18px;margin-bottom:18px;font-size:.92rem}
+.estrategia b{display:block;margin-bottom:2px}
+.op{border-radius:24px;background:var(--suave);padding:20px;margin-bottom:18px}
+.op-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+.op h3{margin:0;font-size:1.15rem;font-weight:600}
+.badge{flex-shrink:0;font-size:.75rem;font-weight:600;background:#fff;border-radius:99px;padding:3px 10px}
+.por{margin:0 0 8px;color:var(--muted);font-size:.92rem}
+.idea-uso{margin:0 0 12px;font-size:.9rem}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px}
+.tabs button{font:inherit;font-size:.85rem;font-weight:500;white-space:nowrap;border:1.5px solid var(--line);background:#fff;border-radius:99px;padding:6px 12px;cursor:pointer;color:var(--ink)}
+.tabs button[aria-selected=true]{background:var(--ama);border-color:var(--ink)}
+.pieza{background:#fff;border-radius:16px;padding:16px}
+dl{margin:0}dt{font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:10px}
+dt:first-child{margin-top:0}dd{margin:2px 0 0}
+details.guia{margin-top:10px;font-size:.88rem}
+details.guia summary{cursor:pointer;font-weight:600}
+details.guia ul{margin:6px 0 0;padding-left:18px}
+.acciones{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.copy{font:inherit;font-size:.82rem;font-weight:500;background:none;border:1.5px solid var(--ink);border-radius:99px;padding:5px 14px;cursor:pointer;color:var(--ink)}
+.grid-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.g-card{background:var(--suave);border-radius:20px;padding:16px}
+.g-card h3{margin:0;font-size:1rem}
+.g-card p.uso{margin:2px 0 10px;font-size:.82rem;color:var(--muted)}
+.g-card ul{list-style:none;margin:0;padding:0}
+.g-card li{background:#fff;border-radius:12px;padding:9px 12px;margin-bottom:6px;font-size:.92rem;display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.g-card li button{flex-shrink:0;font:inherit;font-size:.75rem;background:none;border:0;text-decoration:underline;cursor:pointer;color:var(--ink);padding:0}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th{text-align:left;background:var(--lila);padding:10px;font-weight:600}
+td{border-bottom:1px solid var(--line);padding:10px;vertical-align:top}
+.tbl{overflow-x:auto;border-radius:16px;border:1px solid var(--line)}
+.p-grupo{margin:18px 0 8px;font-size:1.05rem}
+details.prompt{background:var(--suave);border-radius:18px;padding:14px 16px;margin-bottom:10px}
+details.prompt summary{cursor:pointer;font-weight:600;list-style:none}
+details.prompt summary::-webkit-details-marker{display:none}
+details.prompt summary span{display:block;font-weight:400;font-size:.85rem;color:var(--muted)}
+details.prompt pre{white-space:pre-wrap;font:inherit;font-size:.85rem;background:#fff;border-radius:12px;padding:12px;margin:10px 0 0;max-height:320px;overflow:auto}
+.aviso{border-radius:16px;background:var(--lila);padding:14px 16px;font-size:.9rem;margin-bottom:14px}
+footer{padding:30px 0 40px;text-align:center}
+[hidden]{display:none!important}
+@media (max-width:560px){.chips.c3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="top"><img src="img/logo-valen.png" alt="Valentina García · Empresaria digital" width="415" height="155"><span class="tag">Bono 3</span></div>
+  <h1>Tu asistente de <em>ideas</em></h1>
+  <p>Escribe una idea que salga de tu día y recibe tres formas de contarla en historias, reel, carrusel, TikTok y video largo. Además: tu banco de ganchos, tu semana 70/30 y prompts listos para tu IA.</p>
+</div></header>
+
+<main class="wrap">
+  <!-- Paso 1: acceso -->
+  <form class="card" id="acceso" novalidate>
+    <div class="field">
+      <label for="email">Correo con el que compraste</label>
+      <input type="email" id="email" autocomplete="email" required placeholder="tu@correo.com">
+    </div>
+    <button class="btn" type="submit" id="entrar">Entrar al asistente <span aria-hidden="true">→</span></button>
+    <div class="msg" id="err-acceso" role="alert" hidden></div>
+  </form>
+
+  <!-- Paso 2: datos -->
+  <form class="card" id="form" novalidate hidden>
+    <div class="field">
+      <span class="lbl" id="l-camino">Tu camino</span>
+      <div class="chips c3" role="radiogroup" aria-labelledby="l-camino">
+        <label><input type="radio" name="camino" value="negocio"><span>Negocio</span></label>
+        <label><input type="radio" name="camino" value="marca-personal"><span>Marca personal</span></label>
+        <label><input type="radio" name="camino" value="ugc"><span>UGC</span></label>
+      </div>
+    </div>
+    <div class="field">
+      <label for="nicho">Tu nicho</label>
+      <select id="nicho" disabled><option value="">Primero elige tu camino</option></select>
+      <input type="text" id="nicho-propio" maxlength="60" placeholder="Escribe tu nicho, por ejemplo: clases de yoga" style="margin-top:8px" hidden>
+    </div>
+    <div class="field">
+      <span class="lbl" id="l-obj">Lo que quieres lograr ahora</span>
+      <div class="chips c2" role="radiogroup" aria-labelledby="l-obj">
+        <label><input type="radio" name="objetivo" value="vender"><span>Vender o recibir mensajes</span></label>
+        <label><input type="radio" name="objetivo" value="confianza" checked><span>Ganar confianza</span></label>
+        <label><input type="radio" name="objetivo" value="alcance"><span>Llegar a gente nueva</span></label>
+        <label><input type="radio" name="objetivo" value="comunidad"><span>Conectar con mi comunidad</span></label>
+      </div>
+    </div>
+    <div class="field">
+      <label for="idea">Tu idea <span class="opt">(opcional, pero mejora todo)</span></label>
+      <textarea id="idea" maxlength="300" placeholder="Algo que pasó o que haces en tu día. Ejemplo: cada lunes preparo los pedidos y siempre se me olvida algo"></textarea>
+    </div>
+    <button class="btn" type="submit">Generar mi contenido <span aria-hidden="true">→</span></button>
+    <div class="msg" id="err-form" role="alert" hidden></div>
+  </form>
+
+  <section id="salida" hidden>
+    <div class="tabs-main" role="tablist" aria-label="Secciones">
+      <button type="button" role="tab" data-tab="ideas" aria-selected="true">Ideas en 5 formatos</button>
+      <button type="button" role="tab" data-tab="ganchos" aria-selected="false">Banco de ganchos</button>
+      <button type="button" role="tab" data-tab="semana" aria-selected="false">Mi semana 70/30</button>
+      <button type="button" role="tab" data-tab="prompts" aria-selected="false">Prompts para tu IA</button>
+    </div>
+    <div id="tab-ideas"></div>
+    <div id="tab-ganchos" hidden></div>
+    <div id="tab-semana" hidden></div>
+    <div id="tab-prompts" hidden></div>
+  </section>
+</main>
+
+<footer class="small">© Valentina García · Workshop «De una idea a infinitos contenidos»</footer>
+
+<script src="assets/asistente-datos.js?v=1"></script>
+<script src="assets/asistente-nichos2.js?v=1"></script>
+<script src="assets/asistente-angulos2.js?v=1"></script>
+<script src="assets/asistente-ganchos.js?v=1"></script>
+<script src="assets/asistente-prompts.js?v=1"></script>
+<script src="assets/asistente-motor.js?v=1"></script>
+<script>
+(() => {
+  const D = window.ASIS_DATOS, M = window.ASIS_MOTOR;
+  const $ = s => document.querySelector(s);
+  const store = { get(k){ try { return localStorage.getItem(k); } catch { return null; } }, set(k,v){ try { localStorage.setItem(k,v); } catch {} } };
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let estado = null;
+
+  async function copiar(texto, btn, etiqueta){
+    try { await navigator.clipboard.writeText(texto); btn.textContent = "Copiado"; }
+    catch { btn.textContent = "No se pudo copiar"; }
+    setTimeout(() => btn.textContent = etiqueta, 1600);
+  }
+
+  /* --- Acceso --- */
+  function mostrarForm(){ $("#acceso").hidden = true; $("#form").hidden = false; }
+  const emailOk = store.get("vm_asistente_ok");
+  const qs = new URLSearchParams(location.search);
+  $("#email").value = qs.get("email") || emailOk || "";
+  if (emailOk) mostrarForm();
+
+  $("#acceso").addEventListener("submit", async ev => {
+    ev.preventDefault();
+    const e = $("#err-acceso"); e.hidden = true;
+    const email = $("#email").value.trim();
+    if (!/^\S+@\S+\.\S+$/.test(email)) { e.textContent = "Escribe el correo con el que compraste."; e.hidden = false; return; }
+    const b = $("#entrar"); b.disabled = true;
+    try {
+      const r = await fetch("/api/asistente", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { e.textContent = d.error || "No pudimos verificar tu acceso."; e.hidden = false; return; }
+      store.set("vm_asistente_ok", email); mostrarForm();
+    } catch { e.textContent = "No hay conexión. Revisa tu internet e intenta de nuevo."; e.hidden = false; }
+    finally { b.disabled = false; }
+  });
+
+  /* --- Formulario --- */
+  function llenarNichos(camino, elegido){
+    const s = $("#nicho"); s.disabled = false;
+    s.innerHTML = `<option value="">Elige tu nicho</option>` + D.NICHOS[camino].map(n => `<option value="${n.id}">${esc(n.nombre)}</option>`).join("") + `<option value="propio">Otro (lo escribo yo)</option>`;
+    if (elegido) s.value = elegido;
+    $("#nicho-propio").hidden = s.value !== "propio";
+  }
+  document.querySelectorAll("input[name=camino]").forEach(r => r.addEventListener("change", () => llenarNichos(r.value)));
+  $("#nicho").addEventListener("change", () => { $("#nicho-propio").hidden = $("#nicho").value !== "propio"; if (!$("#nicho-propio").hidden) $("#nicho-propio").focus(); });
+
+  const prev = JSON.parse(store.get("vm_asistente_datos") || "null");
+  if (prev && D.NICHOS[prev.camino]) {
+    document.querySelector(`input[name=camino][value="${prev.camino}"]`).checked = true;
+    llenarNichos(prev.camino, prev.nichoId);
+    if (prev.nichoTexto) $("#nicho-propio").value = prev.nichoTexto;
+    const o = document.querySelector(`input[name=objetivo][value="${prev.objetivo}"]`); if (o) o.checked = true;
+  }
+
+  $("#form").addEventListener("submit", ev => {
+    ev.preventDefault();
+    const e = $("#err-form"); e.hidden = true;
+    const camino = (document.querySelector("input[name=camino]:checked") || {}).value;
+    const nichoId = $("#nicho").value, nichoTexto = $("#nicho-propio").value.trim();
+    const objetivo = (document.querySelector("input[name=objetivo]:checked") || {}).value || "confianza";
+    const err = t => { e.textContent = t; e.hidden = false; };
+    if (!camino) return err("Elige tu camino.");
+    if (!nichoId) return err("Elige tu nicho.");
+    if (nichoId === "propio" && nichoTexto.length < 3) return err("Escribe tu nicho.");
+    estado = { camino, nichoId, nichoTexto, objetivo, idea: $("#idea").value.trim() };
+    store.set("vm_asistente_datos", JSON.stringify({ camino, nichoId, nichoTexto, objetivo }));
+    pintarTodo();
+    $("#salida").hidden = false;
+    $("#salida").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  });
+
+  /* --- Pestañas --- */
+  document.querySelectorAll(".tabs-main button").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll(".tabs-main button").forEach(x => x.setAttribute("aria-selected", x === b));
+    ["ideas","ganchos","semana","prompts"].forEach(t => $("#tab-" + t).hidden = t !== b.dataset.tab);
+  }));
+
+  const semilla = () => Math.floor(Math.random() * 1e9);
+  function pintarTodo(){ pintarIdeas(semilla()); pintarGanchos(semilla()); pintarSemana(semilla()); pintarPrompts(); }
+
+  /* Ideas */
+  function pieza(p){ return `<dl><dt>Gancho</dt><dd>${esc(p.gancho)}</dd><dt>Qué mostrar o decir</dt><dd>${esc(p.desarrollo)}</dd><dt>Cierre</dt><dd>${esc(p.cierre)}</dd></dl>`; }
+  function guia(f){ const g = D.GUIA_FORMATOS[f]; return `<details class="guia"><summary>Cómo grabarlo bien</summary><p style="margin:6px 0 0"><b>Para qué sirve:</b> ${esc(g.funcion)} <b>Duración:</b> ${esc(g.duracion)}</p><ul>${g.graba.map(x => `<li>${esc(x)}</li>`).join("")}</ul><p style="margin:6px 0 0"><b>Mide:</b> ${esc(g.mide)} <b>Evita:</b> ${esc(g.evita)}</p></details>`; }
+  function pintarIdeas(seed){
+    const r = M.generar({ ...estado, seed });
+    const box = $("#tab-ideas");
+    box.innerHTML = `<div class="estrategia"><b>Tu estrategia como ${esc(D.CAMINOS[estado.camino])} · ${esc(r.nicho)}</b>${esc(r.estrategia.meta)} ${esc(r.ajuste)}</div>` +
+      r.opciones.map((op, i) => `
+      <article class="op">
+        <div class="op-head"><h3>${i + 1}. ${esc(op.angulo)}</h3><span class="badge">${op.tipo === "30" ? "30% · tendencia" : "70% · permanente"}</span></div>
+        <p class="por">${esc(op.por_que)}</p>
+        ${op.idea ? `<p class="idea-uso">${esc(op.idea)}</p>` : ""}
+        <div class="tabs" role="tablist">${M.FORMATOS.map(([f, n], j) => `<button type="button" role="tab" aria-selected="${j === 0}" data-op="${i}" data-f="${f}">${n}</button>`).join("")}</div>
+        <div class="pieza" data-pieza="${i}">${pieza(op.formatos.historias)}${guia("historias")}</div>
+        <div class="acciones"><button type="button" class="copy" data-copy="${i}" data-f="historias">Copiar este formato</button><button type="button" class="copy" data-copyall="${i}">Copiar los 5 formatos</button></div>
+      </article>`).join("") +
+      `<div style="text-align:center;margin:6px 0 20px"><button type="button" class="btn sec" id="otras">Darme otras 3 ideas</button></div>`;
+    box.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => {
+      const i = +b.dataset.op;
+      b.parentElement.querySelectorAll("button").forEach(x => x.setAttribute("aria-selected", x === b));
+      box.querySelector(`[data-pieza="${i}"]`).innerHTML = pieza(r.opciones[i].formatos[b.dataset.f]) + guia(b.dataset.f);
+      box.querySelector(`[data-copy="${i}"]`).dataset.f = b.dataset.f;
+    }));
+    const txt = (op, f) => { const p = op.formatos[f], n = M.FORMATOS.find(x => x[0] === f)[1]; return `${op.angulo} · ${n}\nGancho: ${p.gancho}\nQué mostrar o decir: ${p.desarrollo}\nCierre: ${p.cierre}`; };
+    box.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click", () => copiar(txt(r.opciones[+b.dataset.copy], b.dataset.f), b, "Copiar este formato")));
+    box.querySelectorAll("[data-copyall]").forEach(b => b.addEventListener("click", () => { const op = r.opciones[+b.dataset.copyall]; copiar(M.FORMATOS.map(([f]) => txt(op, f)).join("\n\n"), b, "Copiar los 5 formatos"); }));
+    $("#otras").addEventListener("click", () => pintarIdeas(semilla()));
+  }
+
+  /* Ganchos */
+  function pintarGanchos(seed){
+    const gs = M.ganchos({ ...estado, seed });
+    const box = $("#tab-ganchos");
+    box.innerHTML = `<p class="small" style="margin:0 0 12px">El gancho es la primera frase: decide si se quedan o se van en los primeros 3 segundos. Elige uno, escríbelo antes de grabar y pruébalo.</p>
+      <div class="grid-g">${gs.map(g => `<div class="g-card"><h3>${esc(g.nombre)}</h3><p class="uso">${esc(g.uso)}</p><ul>${g.lista.map(t => `<li><span>${esc(t)}</span><button type="button" data-g="${esc(t)}">Copiar</button></li>`).join("")}</ul></div>`).join("")}</div>
+      <div style="text-align:center;margin:16px 0 20px"><button type="button" class="btn sec" id="otros-g">Darme otros ganchos</button></div>`;
+    box.querySelectorAll("[data-g]").forEach(b => b.addEventListener("click", () => copiar(b.dataset.g, b, "Copiar")));
+    $("#otros-g").addEventListener("click", () => pintarGanchos(semilla()));
+  }
+
+  /* Semana */
+  function pintarSemana(seed){
+    const cal = M.calendario({ ...estado, seed });
+    const box = $("#tab-semana");
+    box.innerHTML = `<p class="small" style="margin:0 0 12px">Cinco piezas permanentes (70%) y dos de tendencia (30%). Suma historias todos los días documentando tu día.</p>
+      <div class="tbl"><table><thead><tr><th>Día</th><th>Formato</th><th>Ángulo</th><th>Gancho</th><th>Cierre</th></tr></thead><tbody>
+      ${cal.map(d => `<tr><td><b>${d.dia}</b><br><span class="small">${d.tipo === "30" ? "30%" : "70%"}</span></td><td>${esc(d.formato)}</td><td>${esc(d.angulo)}</td><td>${esc(d.gancho)}</td><td>${esc(d.cierre)}</td></tr>`).join("")}
+      </tbody></table></div>
+      <div class="acciones" style="justify-content:center;margin:14px 0 20px"><button type="button" class="copy" id="copiar-semana">Copiar mi semana</button><button type="button" class="btn sec" id="otra-semana">Armar otra semana</button></div>`;
+    $("#copiar-semana").addEventListener("click", e => copiar(cal.map(d => `${d.dia} (${d.tipo}%) · ${d.formato} · ${d.angulo}\nGancho: ${d.gancho}\nCierre: ${d.cierre}`).join("\n\n"), e.target, "Copiar mi semana"));
+    $("#otra-semana").addEventListener("click", () => pintarSemana(semilla()));
+  }
+
+  /* Prompts */
+  function pintarPrompts(){
+    const ps = M.prompts(estado);
+    const grupos = [...new Set(ps.map(p => p.grupo))];
+    const box = $("#tab-prompts");
+    box.innerHTML = `<div class="aviso"><b>Cómo usarlos:</b> copia el prompt y pégalo en ChatGPT, Claude o Gemini. Ya van con tu camino, tu nicho y tu objetivo. Donde veas corchetes [así], completa con tu información.</div>` +
+      grupos.map(g => `<h3 class="p-grupo">${esc(g)}</h3>` + ps.filter(p => p.grupo === g).map(p => `
+        <details class="prompt"><summary>${esc(p.titulo)}<span>${esc(p.para)}</span></summary><pre>${esc(p.texto)}</pre>
+        <div class="acciones"><button type="button" class="copy" data-p="${p.id}">Copiar prompt</button></div></details>`).join("")).join("");
+    box.querySelectorAll("[data-p]").forEach(b => b.addEventListener("click", () => copiar(ps.find(p => p.id === b.dataset.p).texto, b, "Copiar prompt")));
+  }
+})();
+</script>
+</body>
+</html>
