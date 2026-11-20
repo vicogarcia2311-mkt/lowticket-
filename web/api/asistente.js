@@ -10,9 +10,10 @@ const { configured, rest } = require("./_supabase");
 
 const limpiarEmail = e => String(e || "").trim().toLowerCase();
 
+// El equipo entra sin compra y sin esperar a la fecha de activación, para poder probar.
+const esEquipo = email => (process.env.ASISTENTE_PRUEBA || "").split(",").map(limpiarEmail).filter(Boolean).includes(email);
+
 async function esCompradora(email) {
-  const equipo = (process.env.ASISTENTE_PRUEBA || "").split(",").map(limpiarEmail).filter(Boolean);
-  if (equipo.includes(email)) return true;
   const patron = email.replace(/[\\%_]/g, m => "\\" + m); // ilike sin comodines: correo exacto sin importar mayúsculas
   const filas = await rest(`ventas?email=ilike.${encodeURIComponent(patron)}&estado=eq.aprobada&select=id&limit=1`);
   return filas.length > 0;
@@ -27,8 +28,10 @@ module.exports = async (req, res) => {
   const email = limpiarEmail((body || {}).email);
   if (!/^\S+@\S+\.\S+$/.test(email)) return res.status(400).json({ error: "Escribe el correo con el que compraste." });
 
+  const equipo = esEquipo(email);
   const abre = process.env.ASISTENTE_ABRE_ISO ? Date.parse(process.env.ASISTENTE_ABRE_ISO) : NaN;
-  if (!isNaN(abre) && Date.now() < abre) return res.status(403).json({ error: "El asistente se activa después de la clase en vivo." });
+  if (!equipo && !isNaN(abre) && Date.now() < abre) return res.status(403).json({ error: "El asistente se activa después de la clase en vivo." });
+  if (equipo) return res.status(200).json({ ok: true });
   if (!configured()) return res.status(503).json({ error: "El asistente todavía no está disponible." });
 
   try {
