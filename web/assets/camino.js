@@ -288,16 +288,17 @@ const ANGULOS = {
 
 const CLIPS = ["clip01","clip02","clip03","clip04","clip05","clip06","clip07","clip08"]; // web/media, 5 s, sin audio
 
-/* Collage de videos de la bio: 8 portadas reales de fondo + 1 solo <video> optimizado para móvil/iOS */
+/* Collage de videos de la bio: mismo modelo en PC y móvil (flash → grilla 4×2 → 1 video en grande), usando <img> en grilla + 1 solo <video> para que nunca falle en celular */
 function initReel(){
   const reel = $("[data-reel]"); if(!reel) return;
+  const thumbs = [...reel.querySelectorAll(".reel-grid img")];
   const solo = reel.querySelector(".reel-solo video");
   const playBtn = reel.querySelector("[data-reel-play]");
   const countEl = reel.querySelector("[data-reel-count]");
   const prevBtn = reel.querySelector("[data-reel-prev]");
   const nextBtn = reel.querySelector("[data-reel-next]");
   const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let idx = 0, timer = null, inView = false, loaded = false;
+  let idx = 0, runId = 0, inView = false, started = false;
 
   solo.muted = true;
   solo.defaultMuted = true;
@@ -306,16 +307,19 @@ function initReel(){
   solo.setAttribute("playsinline", "");
   solo.setAttribute("webkit-playsinline", "");
 
-  function showClip(nextIdx, autoPlay){
+  const espera = ms => new Promise(r => setTimeout(r, ms));
+
+  function playClip(nextIdx){
     idx = (nextIdx + CLIPS.length) % CLIPS.length;
     const c = CLIPS[idx];
     if(countEl) countEl.textContent = `${idx + 1}/${CLIPS.length}`;
-    reel.querySelectorAll(".reel-grid img").forEach((img, n) => img.classList.toggle("active", n === idx));
+    thumbs.forEach((img, n) => img.classList.toggle("active", n === idx));
     solo.poster = `media/${c}.jpg`;
     solo.src = `media/${c}.mp4`;
     solo.load();
-    loaded = true;
-    if(autoPlay && !quieto){
+    reel.classList.remove("is-flash", "is-appear");
+    reel.classList.add("is-solo");
+    if(!quieto){
       const p = solo.play();
       if(p && p.then){
         p.then(() => { if(playBtn) playBtn.hidden = true; })
@@ -324,33 +328,80 @@ function initReel(){
     }
   }
 
-  function scheduleNext(){
-    clearTimeout(timer);
-    if(!inView || quieto) return;
-    timer = setTimeout(() => { showClip(idx + 1, true); scheduleNext(); }, 3600);
+  async function ciclo(myRun){
+    while(myRun === runId && inView){
+      // 1) Flash rápido de las 8 portadas (0ms de carga, instantáneo en celular)
+      reel.classList.remove("is-solo", "is-appear");
+      reel.classList.add("is-flash");
+      solo.pause();
+      for(let k = 0; k < thumbs.length; k++){
+        if(myRun !== runId || !inView) return;
+        thumbs.forEach((img, n) => img.classList.toggle("on", n === k));
+        await espera(240);
+      }
+      thumbs.forEach(img => img.classList.remove("on"));
+      if(myRun !== runId || !inView) return;
+
+      // 2) Aparecen las 8 juntas en la grilla 4×2
+      reel.classList.remove("is-flash");
+      reel.classList.add("is-appear");
+      await espera(1800);
+      if(myRun !== runId || !inView) return;
+
+      // 3) Uno por uno en grande con el único <video>
+      for(let k = 0; k < CLIPS.length; k++){
+        if(myRun !== runId || !inView) return;
+        playClip(k);
+        await espera(3200);
+      }
+      if(myRun !== runId || !inView) return;
+      reel.classList.remove("is-solo");
+      solo.pause();
+      await espera(900);
+    }
+  }
+
+  function jump(delta){
+    runId++;
+    const myRun = runId;
+    playClip(idx + delta);
+    setTimeout(() => {
+      if(myRun !== runId || !inView) return;
+      (async () => {
+        for(let step = 1; step < CLIPS.length; step++){
+          if(myRun !== runId || !inView) return;
+          playClip(idx + 1);
+          await espera(3200);
+        }
+        if(myRun === runId && inView) ciclo(myRun);
+      })();
+    }, 3600);
   }
 
   if(playBtn){
     playBtn.addEventListener("click", () => {
-      if(!loaded) showClip(idx, false);
       solo.muted = true;
-      solo.play().then(() => { playBtn.hidden = true; scheduleNext(); }).catch(() => {});
+      solo.play().then(() => { playBtn.hidden = true; }).catch(() => {});
     });
   }
-  if(prevBtn) prevBtn.addEventListener("click", () => { showClip(idx - 1, true); scheduleNext(); });
-  if(nextBtn) nextBtn.addEventListener("click", () => { showClip(idx + 1, true); scheduleNext(); });
+  if(prevBtn) prevBtn.addEventListener("click", () => jump(-1));
+  if(nextBtn) nextBtn.addEventListener("click", () => jump(1));
 
   new IntersectionObserver(([e]) => {
     inView = e.isIntersecting;
     if(inView){
-      if(!loaded) showClip(0, !quieto);
-      else if(!quieto) solo.play().then(() => { if(playBtn) playBtn.hidden = true; }).catch(() => { if(playBtn) playBtn.hidden = false; });
-      scheduleNext();
+      if(quieto) return;
+      if(!started){ started = true; runId++; ciclo(runId); }
+      else if(reel.classList.contains("is-solo")){
+        solo.play().then(() => { if(playBtn) playBtn.hidden = true; }).catch(() => { if(playBtn) playBtn.hidden = false; });
+      } else {
+        runId++; ciclo(runId);
+      }
     } else {
-      clearTimeout(timer);
-      if(loaded) solo.pause();
+      runId++;
+      solo.pause();
     }
-  }, { rootMargin: "180px 0px", threshold: .1 }).observe(reel);
+  }, { rootMargin: "160px 0px", threshold: .15 }).observe(reel);
 }
 
 const MARQUEE = ["De una idea a infinitos contenidos","Documenta tu día","Estructura 70/30","Tu camino, no el de otra","Workshop en vivo"].map(t => `<span>${t}</span>`).join("");
@@ -420,7 +471,7 @@ function renderAngulo(){
 
   <section class="sec-yellow curve-top bio-sec" style="--curve-from:var(--second)"><div class="wrap quote-grid">
     <div class="reel" data-reel aria-label="Videos de Valentina García trabajando">
-      <div class="reel-grid" aria-hidden="true">${CLIPS.map((c, n) => `<img src="media/${c}.jpg" alt="" width="432" height="768" loading="lazy"${n === 0 ? ' class="active"' : ""}>`).join("")}</div>
+      <div class="reel-grid" aria-hidden="true">${CLIPS.map((c, n) => `<img src="media/${c}.jpg" alt="" width="432" height="768" loading="lazy" style="--i:${n}"${n === 0 ? ' class="active"' : ""}>`).join("")}</div>
       <div class="reel-solo">
         <video muted playsinline webkit-playsinline autoplay loop preload="metadata" disableRemotePlayback poster="media/${CLIPS[0]}.jpg" aria-label="Clip de Valentina García creando contenido"></video>
         <button type="button" class="reel-play" data-reel-play aria-label="Reproducir video" hidden>▶ Ver video</button>
