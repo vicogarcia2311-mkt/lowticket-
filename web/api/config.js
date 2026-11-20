@@ -29,9 +29,13 @@ module.exports = (req, res) => {
     out.fechaClase = process.env.FECHA_CLASE_TEXTO || null;
     out.cierreTexto = process.env.CIERRE_TEXTO || null;
     out.precio = Number(process.env.PRECIO_USD) || null;
-    out.precioRegular = Number(process.env.PRECIO_REGULAR_USD) || null; // se muestra tachado
+    out.precioRegular = Number(process.env.PRECIO_REGULAR_USD) || null;
     out.precioCOP = process.env.PRECIO_COP || null;
   }
-  res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=60");
+  if (process.env.UPSELL_CHECKOUT_URL && (estado === "abierto" || (req.query && req.query.vista === "gracias"))) {
+    out.upsellCheckoutUrl = process.env.UPSELL_CHECKOUT_URL;
+  }
+  // Sin caché: con s-maxage el CDN servía "espera" hasta dos minutos después de la hora de apertura.
+  res.setHeader("Cache-Control", "no-store");
   res.status(200).json(out);
 };
