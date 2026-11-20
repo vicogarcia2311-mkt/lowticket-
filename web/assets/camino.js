@@ -222,8 +222,12 @@ function initEntrada(){
     // WhatsApp = código del país elegido + número local (si la persona escribe el número con "+", se respeta tal cual).
     const crudo = (d.whatsapp || "").trim();
     const local = crudo.replace(/\D/g, "").replace(/^0+/, "");
-    const tel = crudo.startsWith("+") ? "+" + crudo.replace(/\D/g, "") : (d.pais || "+57") + local;
-    const bad = { nombre: !d.nombre.trim(), email: !/^\S+@\S+\.\S+$/.test(d.email || ""), whatsapp: tel.replace(/\D/g,"").length < 8 || local.length < 6 };
+    // Si ya escribió el código del país sin "+" (ej. 573001234567), no se antepone otra vez.
+    const pais = (d.pais || "+57"), soloPais = pais.replace(/\D/g, "");
+    const yaTienePais = local.startsWith(soloPais) && local.length > soloPais.length + 6;
+    const tel = crudo.startsWith("+") ? "+" + crudo.replace(/\D/g, "") : (yaTienePais ? "+" + local : pais + local);
+    d.email = (d.email || "").trim(); // el autocompletado del móvil suele dejar un espacio al final
+    const bad = { nombre: !d.nombre.trim(), email: !/^\S+@\S+\.\S+$/.test(d.email), whatsapp: tel.replace(/\D/g,"").length < 8 || local.length < 6 };
     Object.keys(bad).forEach(k => form[k].setAttribute("aria-invalid", bad[k] ? "true" : "false"));
     if(bad.nombre || bad.email || bad.whatsapp){ showMsg("Revisa tu nombre, tu correo y tu número de WhatsApp."); return; }
     if(!form.consent.checked){ showMsg("Necesitamos tu autorización para tratar tus datos."); return; }
@@ -606,10 +610,14 @@ function renderAngulo(){
       const P = estado.precio, R = estado.precioRegular;
       if(P){
         const copTxt = estado.precioCOP ? `≈ $${esc(estado.precioCOP)} COP` : "";
-        document.querySelectorAll("[data-precio-dato]").forEach(el => el.innerHTML = `${R ? `<span class="val-orig-inline">Precio original ${usd(R)}</span> ` : ""}<strong>${usd(P)}</strong> <span class="cop">${copTxt} · precio de lanzamiento</span>`);
+        document.querySelectorAll("[data-precio-dato]").forEach(el => el.innerHTML = `<span class="precio-dato"><b>${usd(P)}</b>${R ? `<s>antes ${usd(R)}</s>` : ""}</span><span class="cop">${copTxt} · precio de lanzamiento</span>`);
         document.querySelectorAll("[data-precio-regular]").forEach(el => el.outerHTML = R ? `<span class="val">${usd(R)}</span>` : "");
         if(R){ $("[data-total-label]").textContent = "Precio original"; $("[data-total]").textContent = usd(R + totalBonos); }
-        $("[data-precio-bloque]").innerHTML = `<p class="price-now"><span style="font-weight:600">Hoy pagas</span><span class="price-pair"><strong>${usd(P)}</strong><span class="cop">${copTxt}</span></span></p>
+        $("[data-precio-bloque]").innerHTML = `<div class="precio-bloque">
+            <p class="precio-titulo">Hoy pagas</p>
+            <div class="precio-circulo"><span class="moneda">USD</span><b>${P}</b></div>
+            <p class="precio-apoyo">${copTxt}${R ? ` · precio normal <s>${usd(R)}</s>` : ""}</p>
+          </div>
           <p class="urgencia">Precio de lanzamiento: <b>todo por ${usd(P)}</b>, solo en esta edición. La clase queda grabada: <b>acceso de por vida</b> a la grabación, la clase de tu camino y el PDF.</p>`;
         $(".sticky a").textContent = "Reservar mi lugar · " + usd(P);
       }
@@ -628,7 +636,17 @@ function renderAngulo(){
     $(".sticky a").textContent = "Ver lo que incluye";
   }
   aplicarEstado();
-  fetch("/api/config").then(r => r.ok ? r.json() : null).then(c => { if(c){ estado = c; aplicarEstado(); } }).catch(() => {});
+  // Consulta el estado y, mientras el carrito no esté abierto, vuelve a preguntar cada 30 s:
+  // quien deje la página abierta esperando la apertura la ve abrirse sin recargar.
+  function consultarEstado(){
+    return fetch("/api/config", { cache: "no-store" }).then(r => r.ok ? r.json() : null)
+      .then(c => { if(c){ estado = c; aplicarEstado(); } return c; }).catch(() => null);
+  }
+  consultarEstado();
+  const vigilante = setInterval(() => {
+    if(document.hidden) return;
+    consultarEstado().then(c => { if(c && c.estado === "abierto") clearInterval(vigilante); });
+  }, 30000);
 
   btns.forEach(b => b.addEventListener("click", e => {
     e.preventDefault();
